@@ -1,3 +1,18 @@
+//Saving user Stack Pointer
+[PROCESS_TABLE + ( [SYSTEM_STATUS_TABLE + 1] * 16) + 13] = SP;
+
+//Kernel Stack Pointer
+SP = [PROCESS_TABLE + ([SYSTEM_STATUS_TABLE + 1] * 16) + 11] * 512 - 1;
+
+//Backing Registers
+backup;
+
+print [SYSTEM_STATUS_TABLE + 1];
 print "TIMER";
+
+restore;
+
+//Setting SP to User Stack Pointer
+SP = [PROCESS_TABLE + ( [SYSTEM_STATUS_TABLE + 1] * 16) + 13];
 
 ireturn;

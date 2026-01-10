@@ -49,4 +49,11 @@ SP = 8*512;
 loadi(4, 17);
 loadi(5, 18);
 
+//Process Table
+[PROCESS_TABLE + 11] = 80;
+[PROCESS_TABLE + 1] = 0;
+
+//System Status Table
+[SYSTEM_STATUS_TABLE + 1] = 0;
+
 ireturn;
