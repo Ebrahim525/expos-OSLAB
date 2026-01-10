@@ -44,4 +44,9 @@ PTLR = 10;
 SP = 8*512;
 [76*512] = [65*512+1];
 
+
+//Timer Interrupt
+loadi(4, 17);
+loadi(5, 18);
+
 ireturn;
