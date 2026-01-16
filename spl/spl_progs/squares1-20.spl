@@ -1,3 +1,0 @@
-alias n R0;
-n = 20;
-print n*(n+1)*(2*n+1)/6;
