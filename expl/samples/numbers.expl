@@ -6,6 +6,7 @@ int main()
 	begin
 		num=1;
 		while ( num <= 50 ) do
+			breakpoint;
 			temp = exposcall ( "Write", -2, num );
 			num = num + 1;
 		endwhile;
