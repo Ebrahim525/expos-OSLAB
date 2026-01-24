@@ -1,0 +1,20 @@
+// Change State to TERMINATED
+breakpoint;
+alias currentPID R0;
+currentPID = [SYSTEM_STATUS_TABLE + 1]; 
+alias process_table_entry R1;
+process_table_entry = PROCESS_TABLE + currentPID * 16;
+[process_table_entry + 4] = TERMINATED;
+
+alias processLoop R0;
+processLoop = 1;
+while( processLoop < MAX_PROC_NUM ) do
+    if( [PROCESS_TABLE + processLoop*16 + 4] != TERMINATED ) then
+        call CONTEXT_SWITCH;
+        ireturn;
+    endif;
+
+    processLoop = processLoop + 1;
+endwhile;
+
+halt;

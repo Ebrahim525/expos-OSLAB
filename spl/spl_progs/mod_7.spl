@@ -14,11 +14,16 @@ loadi(17, 30);
 loadi(22,35);
 loadi(23,36);
 
+// Modue 5 (Scheduler)
+loadi(50,63);
+loadi(51,64);
+
 // Loading Shared Library
 loadi(63,13);
 loadi(64,14);
 
-// INIT Process (Assginment stage 13: even number)
+
+// INIT Process
 // Loading INIT Code
 loadi(65,7);
 loadi(66,8);
@@ -54,6 +59,7 @@ PTBR = PAGE_TABLE_BASE + 20;
 [PTBR+19] = "0110";
 
 // Setting User Area Page Number in Process Table
+[PROCESS_TABLE + 16 + 0] = 0; // TICK
 [PROCESS_TABLE + 16 + 1] = 1; // PID
 [PROCESS_TABLE + 16 + 4] = CREATED; // State
 [PROCESS_TABLE + 16 + 11] = 80; // User Area Page
@@ -65,7 +71,8 @@ PTBR = PAGE_TABLE_BASE + 20;
 // SETTING ENTRY POINT IN USER STACK
 [76 * 512] = [65 * 512 + 1];
 
-// (Assginment stage 13: odd number)
+
+// Even Number
 loadi(83, 69);
 
 PTBR = PAGE_TABLE_BASE + 40;
@@ -99,6 +106,7 @@ PTBR = PAGE_TABLE_BASE + 40;
 [PTBR+19] = "0110";
 
 // Setting User Area Page Number in Process Table
+[PROCESS_TABLE + 32 + 0] = 0; // TICK
 [PROCESS_TABLE + 32 + 1] = 2; // PID
 [PROCESS_TABLE + 32 + 4] = CREATED; // State
 [PROCESS_TABLE + 32 + 11] = 86; // User Area Page
@@ -109,5 +117,16 @@ PTBR = PAGE_TABLE_BASE + 40;
 
 // SETTING ENTRY POINT IN USER STACK
 [84 * 512] = [65 * 512 + 1];
+
+
+//Setting State of other processes TERMINATED
+alias processLoop R0;
+processLoop = 3;
+
+while( processLoop < MAX_PROC_NUM ) do
+    [PROCESS_TABLE + processLoop*16 + 4] = TERMINATED;
+
+    processLoop = processLoop + 1;
+endwhile;
 
 return;

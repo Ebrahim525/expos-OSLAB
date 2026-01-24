@@ -1,0 +1,54 @@
+// currentPID
+alias currentPID R0;
+currentPID = [SYSTEM_STATUS_TABLE + 1];
+
+// Push BP
+SP = SP + 1;
+[SP] = BP;
+
+alias process_table_entry R1;
+process_table_entry = PROCESS_TABLE + currentPID * 16;
+[process_table_entry + 12] = SP % 512;
+[process_table_entry + 14] = PTBR;
+[process_table_entry + 15] = PTLR;
+
+// Looping through the Process Table
+alias newPID R1;
+newPID = currentPID + 1;
+while( newPID < MAX_PROC_NUM ) do
+    if( [PROCESS_TABLE + newPID*16 + 4] == READY || [PROCESS_TABLE + newPID*16 + 4] == CREATED ) then
+        break;
+    endif;
+
+    newPID = newPID + 1;
+endwhile;
+
+// If no process is in ready after currentPID
+if( newPID == MAX_PROC_NUM ) then
+    newPID = 0;
+endif;
+
+// Setting the new Process
+alias new_process_table R2;
+new_process_table = PROCESS_TABLE + newPID * 16;
+SP = [new_process_table + 11] * 512 + [new_process_table + 12]; // User Area Page
+PTBR = [new_process_table + 14];
+PTLR = [new_process_table + 15];
+
+//Switching System Status table
+[SYSTEM_STATUS_TABLE + 1] = newPID;
+
+if([new_process_table + 4] == CREATED) then
+    SP = [new_process_table + 13];
+    [new_process_table + 4] = RUNNING;
+    [new_process_table + 9] = 0; //MODE FLAG 
+    ireturn;
+endif;
+
+[new_process_table + 4] = RUNNING;
+
+// Restoring BP
+BP = [SP];
+SP = SP - 1;
+
+return;
