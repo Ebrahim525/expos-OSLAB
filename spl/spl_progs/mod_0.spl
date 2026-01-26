@@ -1,0 +1,42 @@
+alias returnVal R0;
+alias functionNum R1;
+alias currentPID R2;
+alias terminalPID R3;
+
+if( functionNum == ACQUIRE_TERMINAL ) then
+    while([TERMINAL_STATUS_TABLE + 0] == 1) do
+        [PROCESS_TABLE + currentPID*16 + 4] = WAIT_TERMINAL;
+        multipush(R1, R2);
+
+        // Calling Scheduler to run other Processes
+        call MOD_5;
+
+        multipop(R1, R2);
+    endwhile;
+
+    [TERMINAL_STATUS_TABLE + 0] = 1;
+    [TERMINAL_STATUS_TABLE + 1] = currentPID;
+    return;
+endif;
+
+if( functionNum == RELEASE_TERMINAL ) then
+    terminalPID = [TERMINAL_STATUS_TABLE + 1];
+    if(currentPID != terminalPID) then
+        returnVal = -1;
+        return;
+    endif;
+
+    [TERMINAL_STATUS_TABLE + 0] = 0;
+
+    alias processLoop R3;
+    while( processLoop < MAX_PROC_NUM ) do
+        if([PROCESS_TABLE + processLoop*16 + 4] ==  WAIT_TERMINAL && [PROCESS_TABLE + processLoop*16 +1] > 0) then
+            [PROCESS_TABLE + processLoop*16 + 4] = READY;
+        endif;
+
+        processLoop = processLoop + 1;
+    endwhile;
+
+    returnVal = 0;
+    return;
+endif;

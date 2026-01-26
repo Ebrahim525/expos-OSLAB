@@ -27,7 +27,7 @@ while( processLoop < MAX_PROC_NUM ) do
 endwhile;
 
 // Scheduler Module
-call CONTEXT_SWITCH;
+call MOD_5;
 
 // Restoring Registers
 restore;
