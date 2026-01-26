@@ -16,6 +16,9 @@ if( functionNum == ACQUIRE_TERMINAL ) then
 
     [TERMINAL_STATUS_TABLE + 0] = 1;
     [TERMINAL_STATUS_TABLE + 1] = currentPID;
+    
+    breakpoint;
+    
     return;
 endif;
 
@@ -38,5 +41,8 @@ if( functionNum == RELEASE_TERMINAL ) then
     endwhile;
 
     returnVal = 0;
+
+    breakpoint;
+    
     return;
 endif;
