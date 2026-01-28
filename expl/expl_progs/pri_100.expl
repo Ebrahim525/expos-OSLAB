@@ -5,36 +5,39 @@ enddecl
 int isPrime(int num)
 {
     decl
-        int i;
+        int i, b;
     enddecl
     begin
         i = 2;
+        b = 1;
         while(i < num) do
-            if(num%i == 0) then
-                return 0;
+            if((num%i) == 0) then
+                b = 0;
             endif;
 
             i = i + 1;
         endwhile;
 
-        return 1;
+        return b;
     end
 }
+
 int main()
 {
     decl
         int temp, num;
     enddecl
     begin
+        breakpoint;
         num = 2;
         while(num < 100) do
             temp = isPrime(num);
             if(temp == 1) then
-                exposcall("Write", -2, num);
+                temp = exposcall("Write", -2, num);
             endif;
 
             num = num + 1;
         endwhile;
         return 0;
-    end;
+    end
 }

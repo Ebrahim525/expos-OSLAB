@@ -40,6 +40,7 @@ PTLR = [new_process_table + 15];
 
 if([new_process_table + 4] == CREATED) then
     SP = [new_process_table + 13];
+    R5 = [[PTBR + 2*(SP/512)]*512 + SP%512];
     [new_process_table + 4] = RUNNING;
     [new_process_table + 9] = 0; //MODE FLAG 
     ireturn;

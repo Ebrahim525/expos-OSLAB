@@ -116,12 +116,58 @@ PTBR = PAGE_TABLE_BASE + 40;
 [PROCESS_TABLE + 32 + 15] = 10; // PTLR
 
 // SETTING ENTRY POINT IN USER STACK
-[84 * 512] = [65 * 512 + 1];
+[84 * 512] = [83 * 512 + 1];
 
+
+// Prime Number
+loadi(87, 70);
+
+PTBR = PAGE_TABLE_BASE + 60;
+
+// SHARED Library
+[PTBR+0] = 63;
+[PTBR+1] = "0100";
+[PTBR+2] = 64;
+[PTBR+3] = "0100";
+
+// Heap
+[PTBR+4] = -1;
+[PTBR+5] = "0000";
+[PTBR+6] = -1;
+[PTBR+7] = "0000";
+
+// Code
+[PTBR+8] = 87;
+[PTBR+9] = "0100";
+[PTBR+10] = -1;
+[PTBR+11] = "0000";
+[PTBR+12] = -1;
+[PTBR+13] = "0000";
+[PTBR+14] = -1;
+[PTBR+15] = "0000";
+
+// Stack
+[PTBR+16] = 88;
+[PTBR+17] = "0110";
+[PTBR+18] = 89;
+[PTBR+19] = "0110";
+
+// Setting User Area Page Number in Process Table
+[PROCESS_TABLE + 48 + 0] = 0; // TICK
+[PROCESS_TABLE + 48 + 1] = 3; // PID
+[PROCESS_TABLE + 48 + 4] = CREATED; // State
+[PROCESS_TABLE + 48 + 11] = 90; // User Area Page
+[PROCESS_TABLE + 48 + 12] = 0; // KPTR
+[PROCESS_TABLE + 48 + 13] = 8*512; // UPTR
+[PROCESS_TABLE + 48 + 14] = PAGE_TABLE_BASE+60; // PTBR
+[PROCESS_TABLE + 48 + 15] = 10; // PTLR
+
+// SETTING ENTRY POINT IN USER STACK
+[88 * 512] = [87 * 512 + 1];
 
 //Setting State of other processes TERMINATED
 alias processLoop R0;
-processLoop = 3;
+processLoop = 4;
 
 while( processLoop < MAX_PROC_NUM ) do
     [PROCESS_TABLE + processLoop*16 + 4] = TERMINATED;
