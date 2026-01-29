@@ -39,11 +39,11 @@ else
 	call MOD_4;
 
 	multipop(R0, R1, R2, R3, R4, R5);
-endif;
 
-alias physicalAddrRetVal R6;
-physicalAddrRetVal = ([PTBR + 2 * (userSP - 1) / 512] * 512) + ((userSP - 1) % 512);
-[physicalAddrRetVal] = 0;
+	alias physicalAddrRetVal R6;
+	physicalAddrRetVal = ([PTBR + 2 * (userSP - 1) / 512] * 512) + ((userSP - 1) % 512);
+	[physicalAddrRetVal] = 0;
+endif;
 
 //Changing to user mode and setting MODE Flag
 SP = userSP;

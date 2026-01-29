@@ -6,6 +6,14 @@ loadi(3, 16);
 loadi(4, 17);
 loadi(5, 18);
 
+// Console Interrupt
+loadi(8, 21)
+loadi(9, 22)
+
+// INT 6
+loadi(14, 27)
+loadi(15, 28)
+
 // INT 7
 loadi(16, 29);
 loadi(17, 30);
@@ -81,53 +89,6 @@ PTBR = PAGE_TABLE_BASE + 20;
 
 // SETTING ENTRY POINT IN USER STACK
 [76 * 512] = [65 * 512 + 1];
-
-
-// Even Number
-loadi(83, 69);
-
-PTBR = PAGE_TABLE_BASE + 40;
-
-// SHARED Library
-[PTBR+0] = 63;
-[PTBR+1] = "0100";
-[PTBR+2] = 64;
-[PTBR+3] = "0100";
-
-// Heap
-[PTBR+4] = -1;
-[PTBR+5] = "0000";
-[PTBR+6] = -1;
-[PTBR+7] = "0000";
-
-// Code
-[PTBR+8] = 83;
-[PTBR+9] = "0100";
-[PTBR+10] = -1;
-[PTBR+11] = "0000";
-[PTBR+12] = -1;
-[PTBR+13] = "0000";
-[PTBR+14] = -1;
-[PTBR+15] = "0000";
-
-// Stack
-[PTBR+16] = 84;
-[PTBR+17] = "0110";
-[PTBR+18] = 85;
-[PTBR+19] = "0110";
-
-// Setting User Area Page Number in Process Table
-[PROCESS_TABLE + 32 + 0] = 0; // TICK
-[PROCESS_TABLE + 32 + 1] = 2; // PID
-[PROCESS_TABLE + 32 + 4] = CREATED; // State
-[PROCESS_TABLE + 32 + 11] = 86; // User Area Page
-[PROCESS_TABLE + 32 + 12] = 0; // KPTR
-[PROCESS_TABLE + 32 + 13] = 8*512; // UPTR
-[PROCESS_TABLE + 32 + 14] = PAGE_TABLE_BASE+40; // PTBR
-[PROCESS_TABLE + 32 + 15] = 10; // PTLR
-
-// SETTING ENTRY POINT IN USER STACK
-[84 * 512] = [65 * 512 + 1];
 
 
 //Setting State of other processes TERMINATED
