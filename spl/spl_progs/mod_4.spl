@@ -4,19 +4,20 @@ alias word R3;
 
 if( functionNum == TERMINAL_WRITE ) then
     // Acquire Terminal
-    multipush(R1, R2);
+    multipush(R1, R2, R3);
     functionNum = ACQUIRE_TERMINAL;
     currentPID = R2;
     call MOD_0;
-    multipop(R1, R2);
+    multipop(R1, R2, R3);
+    
     print(word);
 
     //Release Terminal
-    multipush(R1, R2);
+    multipush(R1, R2, R3);
     functionNum = RELEASE_TERMINAL;
     currentPID = R2;
     call MOD_0;
-    multipop(R1, R2);
+    multipop(R1, R2, R3);
     return;
 
 else
