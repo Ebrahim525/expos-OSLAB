@@ -34,11 +34,16 @@ int main()
 {
     decl
         int n, temp, i;
+        string w;
     enddecl
     begin
+        w = "Enter Size: ";
+        temp = exposcall("Write", -2, w);
         temp = exposcall("Read", -1, n);
 
         i = 0;
+        w = "Enter Numbers";
+        temp = exposcall("Write", -2, w);
         while(i < n) do
             temp = exposcall("Read", -1, a[i]);
             i = i + 1;
@@ -47,6 +52,8 @@ int main()
         temp = bubble(n);
         
         i = 0;
+        w = "Sorted: ";
+        temp = exposcall("Write", -2, w);
         while(i < n) do
             temp = exposcall("Write", -2, a[i]);
             i = i + 1;

@@ -37,3 +37,6 @@ y.tab.c: splparser.y
 
 clean:
 	$(RM) spl *.o lex.yy.c y.tab.h y.tab.c .temp xsm
+
+include spl_compile.mk
+

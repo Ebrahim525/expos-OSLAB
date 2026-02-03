@@ -25,7 +25,7 @@ if (fileDescriptor != -1) then
     [physicalAddrRetVal] = -1;
 else
     alias word R5;
-    word = [([PTBR + 2 * (userSP - 2) / 512]) * 512 + ((userSP - 2) % 512)];
+    word = [[PTBR + 2 * ((userSP - 3) / 512)] * 512 + ((userSP - 3) % 512)];
 
     multipush(R0, R1, R2, R3, R4, R5);
 

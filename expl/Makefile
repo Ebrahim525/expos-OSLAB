@@ -31,3 +31,4 @@ y.tab.c: abstree.y
 
 clean:
 		$(RM) expl-bin ltranslate *.o lex.yy.c y.* ltranslate.lex.c assemblycode.xsm
+include expl_compile.mk

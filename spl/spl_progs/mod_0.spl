@@ -29,6 +29,7 @@ if( functionNum == RELEASE_TERMINAL ) then
     [TERMINAL_STATUS_TABLE + 0] = 0;
 
     alias processLoop R3;
+    processLoop = 1;
     while( processLoop < MAX_PROC_NUM ) do
         if([PROCESS_TABLE + processLoop*16 + 4] ==  WAIT_TERMINAL && [PROCESS_TABLE + processLoop*16 +1] > 0) then
             [PROCESS_TABLE + processLoop*16 + 4] = READY;

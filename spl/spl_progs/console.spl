@@ -7,17 +7,16 @@ backup;
 alias reqPID R0;
 reqPID = [TERMINAL_STATUS_TABLE + 1];
 
-alias process_table_entry R1;
-process_table_entry = [PROCESS_TABLE + reqPID * 16];
+[PROCESS_TABLE + reqPID * 16 + 8] = P0;
+R1 = [PROCESS_TABLE + reqPID * 16 + 8];
 
-[process_table_entry + 8] = P0;
 
 //Release terminal
-multipush(R1, R2, R3);
-functionNum = RELEASE_TERMINAL;
+multipush(R0);
+R1 = RELEASE_TERMINAL;
 R2 = reqPID;
 call MOD_0;
-multipop(R1, R2, R3);
+multipop(R0);
 
 restore;
 

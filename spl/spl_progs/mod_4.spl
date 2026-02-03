@@ -25,21 +25,19 @@ if( functionNum == TERMINAL_READ) then
     // Acquire Terminal
     multipush(R1, R2, R3);
     functionNum = ACQUIRE_TERMINAL;
-    currentPID = R2;
     call MOD_0;
     multipop(R1, R2, R3);
 
     read;
 
     //Change state of current process to wait
+    [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 4] = WAIT_TERMINAL;
 
     multipush(R1, R2, R3);
     call MOD_5;
     multipop(R1, R2, R3);
-
-    alias physicalAddr R4;
-    physicalAddr = ([PTBR + R3 / 512] * 512) + (R3 % 512);
-    physicalAddr = [Processes + currentPID * 16 + 8];
+    
+    [([PTBR + 2 * (word / 512)] * 512) + (word % 512)] = [PROCESS_TABLE + currentPID * 16 + 8];
     return;
 endif;
 
