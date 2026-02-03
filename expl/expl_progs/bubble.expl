@@ -1,0 +1,57 @@
+decl
+    int a[20];
+    int bubble(int n);
+enddecl
+
+int bubble(int n)
+{
+    decl
+        int i, j, temp;
+    enddecl
+    begin
+        i = 0;
+
+        while(i < (n - 1)) do
+            j = 0;
+            while(j < (n - i - 1)) do
+                if(a[j] > a[j + 1]) then
+                    temp = a[j];
+                    a[j] = a[j + 1];
+                    a[j + 1] = temp;
+                endif;
+
+                j = j + 1;
+            endwhile;
+
+            i = i + 1;
+        endwhile;
+
+        return 1;
+    end
+}
+
+int main()
+{
+    decl
+        int n, temp, i;
+    enddecl
+    begin
+        temp = exposcall("Read", -1, n);
+
+        i = 0;
+        while(i < n) do
+            temp = exposcall("Read", -1, a[i]);
+            i = i + 1;
+        endwhile;
+
+        temp = bubble(n);
+        
+        i = 0;
+        while(i < n) do
+            temp = exposcall("Write", -2, a[i]);
+            i = i + 1;
+        endwhile;
+
+        return 0;
+    end
+}
