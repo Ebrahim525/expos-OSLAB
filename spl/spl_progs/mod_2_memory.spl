@@ -41,6 +41,10 @@ if(functionNum == RELEASE_PAGE) then
     memFreeListEntry = [MEMORY_FREE_LIST + pageNumber];
     memFreeListEntry = memFreeListEntry - 1;
 
+    if(pageNumber == 65 || pageNumber == 66) then
+        return;
+    endif;
+
     if(memFreeListEntry == 0) then
         // Increment in System Status table
         [SYSTEM_STATUS_TABLE + 2] = [SYSTEM_STATUS_TABLE + 2] + 1;

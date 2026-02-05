@@ -1,0 +1,45 @@
+decl
+    int gcd(int a, int b);
+enddecl
+
+int gcd(int a, int b)
+{   
+    decl
+        int result;
+    enddecl
+    begin
+        if(b == 0) then
+            result = a;
+        else
+            result = gcd(b, (a%b));
+        endif;
+
+        return result;
+    end
+}
+
+int main()
+{
+    decl
+        int a, b, c, temp;
+        string w;
+    enddecl
+    begin
+        w = "Enter Number: ";
+        temp = exposcall("Write", -2, w);
+        breakpoint;
+        temp = exposcall("Read", -1, a);
+
+        w = "Enter Number: ";
+        temp = exposcall("Write", -2, w);
+        temp = exposcall("Read", -1, b);
+
+        c = gcd(a, b);
+
+        w = "Output: ";
+        temp = exposcall("Write", -2, w);
+        temp = exposcall("Write", -2, c);
+
+        return 0;
+    end
+}

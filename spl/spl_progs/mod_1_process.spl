@@ -12,7 +12,6 @@ if(functionNum == FREE_USER_AREA_PAGE) then
     call MOD_2;
 
     multipop(R1, R2, R3);
-
     return;
 endif;
 
