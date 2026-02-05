@@ -1,0 +1,61 @@
+alias functionNum R1;
+
+if(functionNum == GET_FREE_PAGE) then
+    alias currentPID R2;
+
+    //Wait mem count
+    [SYSTEM_STATUS_TABLE + 3] = [SYSTEM_STATUS_TABLE + 3] + 1;
+    
+    while([SYSTEM_STATUS_TABLE + 2] == 0) do
+        [PROCESS_TABLE + currentPID*16 + 4] = WAIT_MEM;
+
+        multipush(R1, R2);
+
+        call MOD_5;
+
+        multipop(R1, R2);
+    endwhile;
+
+    // Decrement  mem wait count and mem free count
+    [SYSTEM_STATUS_TABLE + 3] = [SYSTEM_STATUS_TABLE + 3] - 1;
+    [SYSTEM_STATUS_TABLE + 2] = [SYSTEM_STATUS_TABLE + 2] - 1;
+
+    //Find a free page
+    alias loop R0;
+    loop = 76;
+    while(loop < NUM_MEM_PAGES) do
+        if([MEMORY_FREE_LIST + loop] == 0) then
+            [MEMORY_FREE_LIST + loop] = 1;
+            break;
+        endif;
+
+        loop = loop + 1;
+    endwhile;
+
+    return;
+endif;
+
+if(functionNum == RELEASE_PAGE) then
+    alias pageNumber R2;
+    alias memFreeListEntry R3;
+    memFreeListEntry = [MEMORY_FREE_LIST + pageNumber];
+    memFreeListEntry = memFreeListEntry - 1;
+
+    if(memFreeListEntry == 0) then
+        // Increment in System Status table
+        [SYSTEM_STATUS_TABLE + 2] = [SYSTEM_STATUS_TABLE + 2] + 1;
+    endif;
+
+
+    alias processLoop R4;
+    processLoop = 1;
+    while( processLoop < MAX_PROC_NUM ) do
+        if([PROCESS_TABLE + processLoop*16 + 4] ==  WAIT_MEM) then
+            [PROCESS_TABLE + processLoop*16 + 4] = READY;
+        endif;
+
+        processLoop = processLoop + 1;
+    endwhile;
+
+    return;
+endif;

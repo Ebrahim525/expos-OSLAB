@@ -1,0 +1,67 @@
+alias functionNum R1;
+alias currentPID R2;
+
+if(functionNum == FREE_USER_AREA_PAGE) then
+    alias userAreaPage R3;
+    userAreaPage = [PROCESS_TABLE + currentPID * 16 + 11];
+
+    multipush(R1, R2, R3);
+
+    R1 = RELEASE_PAGE;
+    R2 = userAreaPage;
+    call MOD_2;
+
+    multipop(R1, R2, R3);
+
+    return;
+endif;
+
+if(functionNum == EXIT_PROCESS) then
+    multipush(R1, R2);
+    
+    R1 = FREE_PAGE_TABLE;
+    R2 = currentPID;
+    call MOD_1;
+
+    R1 = FREE_USER_AREA_PAGE;
+    R2 = currentPID;
+    call MOD_1;
+
+    multipop(R1, R2);
+
+    // Set the state as terminated
+    [PROCESS_TABLE + currentPID * 16 + 4] = TERMINATED;
+
+    return;
+endif;
+
+if(functionNum == FREE_PAGE_TABLE) then
+    alias loop R3;
+    loop = 0;
+
+    // Library
+    while(loop < 4) do
+        [PTBR + loop] = -1;
+        [PTBR + loop + 1] = "0000";
+
+        loop = loop + 2;
+    endwhile;
+    
+    // Other Entries
+    while(loop < 20) do
+        multipush(R1, R2, R3);
+        
+        R1 = RELEASE_PAGE;
+        R2 = [PTBR + loop];
+        call MOD_2;
+
+        multipop(R1, R2, R3);
+
+        [PTBR + loop] = -1;
+        [PTBR + loop + 1] = "0000";
+
+        loop = loop + 2;
+    endwhile;
+
+    return;
+endif;

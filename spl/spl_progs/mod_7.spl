@@ -18,6 +18,10 @@ loadi(15, 28);
 loadi(16, 29);
 loadi(17, 30);
 
+// INT 9 (Exec)
+loadi(20, 33);
+loadi(21, 34);
+
 // INT 10 (After execution)
 loadi(22,35);
 loadi(23,36);
@@ -25,6 +29,14 @@ loadi(23,36);
 // Module 0 (Terminal Acquire and Release)
 loadi(40, 53);
 loadi(41, 54);
+
+// Module 1 (Process)
+loadi(42, 55);
+loadi(43, 56);
+
+// Module 2 (Memory)
+loadi(44, 57);
+loadi(45, 58);
 
 // Module 4 (Terminal Write)
 loadi(48, 61);
@@ -38,9 +50,14 @@ loadi(51,64);
 loadi(63,13);
 loadi(64,14);
 
+// Inode Table and User Table
+loadi(59, 3);
+loadi(60, 4);
+
 
 // Terminal Status Table
 [TERMINAL_STATUS_TABLE + 0] = 0;
+
 
 // INIT Process
 // Loading INIT Code
@@ -94,11 +111,33 @@ PTBR = PAGE_TABLE_BASE + 20;
 //Setting State of other processes TERMINATED
 alias processLoop R0;
 processLoop = 2;
-
 while( processLoop < MAX_PROC_NUM ) do
     [PROCESS_TABLE + processLoop*16 + 4] = TERMINATED;
 
     processLoop = processLoop + 1;
 endwhile;
+
+
+//Memory Free List
+alias memLoop R0;
+memLoop = 0;
+while(memLoop < 83) do
+    [MEMORY_FREE_LIST + memLoop] = 1;
+
+    memLoop = memLoop + 1;
+endwhile;
+
+while(memLoop < NUM_MEM_PAGES) do
+    [MEMORY_FREE_LIST + memLoop] = 0;
+
+    memLoop = memLoop + 1;
+endwhile;
+
+
+// System Status Table
+// Wait Mem Count
+[SYSTEM_STATUS_TABLE + 3] = 0;
+// Mem Free Count
+[SYSTEM_STATUS_TABLE + 2] = 45;
 
 return;
