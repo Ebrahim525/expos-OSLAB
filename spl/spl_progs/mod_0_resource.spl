@@ -1,9 +1,22 @@
 alias returnVal R0;
 alias functionNum R1;
 alias currentPID R2;
-alias terminalPID R3;
+
+
+if(functionNum == ACQUIRE_DISK) then    
+    while([DISK_STATUS_TABLE + 0] == 1) do
+        [PROCESS_TABLE + currentPID * 16 + 4] = WAIT_DISK;
+    endwhile;
+
+    [DISK_STATUS_TABLE + 0] = 1;
+    [DISK_STATUS_TABLE + 4] = currentPID;
+
+    return;
+endif;
 
 if( functionNum == ACQUIRE_TERMINAL ) then
+    alias terminalPID R3;
+
     while([TERMINAL_STATUS_TABLE + 0] == 1) do
         [PROCESS_TABLE + currentPID*16 + 4] = WAIT_TERMINAL;
         multipush(R1, R2);
@@ -20,6 +33,8 @@ if( functionNum == ACQUIRE_TERMINAL ) then
 endif;
 
 if( functionNum == RELEASE_TERMINAL ) then
+    alias terminalPID R3;
+
     terminalPID = [TERMINAL_STATUS_TABLE + 1];
     if(currentPID != terminalPID) then
         returnVal = -1;

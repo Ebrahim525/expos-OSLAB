@@ -51,6 +51,15 @@ userAreaPage = [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 11];
 //Decrementing Mem Free Count
 [SYSTEM_STATUS_TABLE + 2] = [SYSTEM_STATUS_TABLE + 2] - 1;
 
+// Setting Per Process Table
+alias loop R5;
+loop = 0;
+while(loop < 16) do
+    [((userAreaPage + 1) * 512) - 16 + loop] = -1;
+
+    loop = loop + 1;
+endwhile;
+
 SP = userAreaPage * 512 - 1;
 
 //State and Inode
@@ -64,7 +73,7 @@ SP = userAreaPage * 512 - 1;
 [PTBR+3] = "0100";
 
 //set arguments and save reg
-multipush(R0, R1, R2, R3, R4);
+multipush(R0, R1, R2, R3, R4, R5);
 
 //Heap
 R1 = GET_FREE_PAGE;
@@ -85,7 +94,6 @@ call MOD_2;
 [PTBR + 19] = "0110";
 
 //Code
-alias loop R5;
 loop = 8;
 while(loop < 16) do
     call MOD_2;
@@ -95,18 +103,28 @@ while(loop < 16) do
     loop = loop + 2;
 endwhile;
 
-multipop(R0, R1, R2, R3, R4);
+multipop(R0, R1, R2, R3, R4, R5);
 
-//load the code blocks from disk to memory
+
+// Load the code blocks from disk to memory
 loop = 0;
 while(loop < 4) do
     R6 = [INODE_TABLE + inodeEntry * 16 + loop + 8];
     if(R6 != -1) then
-        loadi([PTBR + 2 * loop + 8], R6);
+        multipush(R0, R1, R2, R3, R4, R5);
+        
+        R1 = DISK_LOAD;
+        R2 = [SYSTEM_STATUS_TABLE + 1];
+        R3 = [PTBR + 2 * loop + 8];
+        R4 = R6;
+        call MOD_4;
+
+        multipop(R0, R1, R2, R3, R4, R5);
     endif;
 
     loop = loop + 1;
 endwhile;
+
 
 //Setting entry point in user stack
 [[PTBR + 16] * 512] = [[PTBR + 8] * 512 + 1];
@@ -115,5 +133,5 @@ endwhile;
 SP = 8 * 512;
 
 [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 9] = 0;
-breakpoint;
+
 ireturn;

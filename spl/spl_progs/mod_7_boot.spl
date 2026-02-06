@@ -6,6 +6,10 @@ loadi(3, 16);
 loadi(4, 17);
 loadi(5, 18);
 
+// Disk Interrupt
+loadi(6, 19);
+loadi(7, 20);
+
 // Console Interrupt
 loadi(8, 21);
 loadi(9, 22);
@@ -53,10 +57,6 @@ loadi(64,14);
 // Inode Table and User Table
 loadi(59, 3);
 loadi(60, 4);
-
-
-// Terminal Status Table
-[TERMINAL_STATUS_TABLE + 0] = 0;
 
 
 // INIT Process
@@ -107,6 +107,16 @@ PTBR = PAGE_TABLE_BASE + 20;
 // SETTING ENTRY POINT IN USER STACK
 [76 * 512] = [65 * 512 + 1];
 
+// Per Process table for Init Process
+alias loop R0;
+loop = 0;
+while(loop < 16) do
+    [(81 * 512) - 16 + loop] = -1;
+
+    loop = loop + 1;
+endwhile;
+
+
 
 //Setting State of other processes TERMINATED
 alias processLoop R0;
@@ -139,5 +149,13 @@ endwhile;
 [SYSTEM_STATUS_TABLE + 3] = 0;
 // Mem Free Count
 [SYSTEM_STATUS_TABLE + 2] = 45;
+
+
+// Terminal Status Table
+[TERMINAL_STATUS_TABLE + 0] = 0;
+
+
+// Disk Status Table
+[DISK_STATUS_TABLE + 0] = 0;
 
 return;
