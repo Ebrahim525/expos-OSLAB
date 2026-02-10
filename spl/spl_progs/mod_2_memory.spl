@@ -38,8 +38,8 @@ endif;
 if(functionNum == RELEASE_PAGE) then
     alias pageNumber R2;
     alias memFreeListEntry R3;
-    memFreeListEntry = [MEMORY_FREE_LIST + pageNumber];
-    memFreeListEntry = memFreeListEntry - 1;
+    memFreeListEntryAddr = MEMORY_FREE_LIST + pageNumber;
+    [memFreeListEntryAddr] = [memFreeListEntryAddr] - 1;
 
     if(memFreeListEntry == 0 && pageNumber != 65 && pageNumber != 66) then
         // Increment in System Status table
