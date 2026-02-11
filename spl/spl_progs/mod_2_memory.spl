@@ -37,7 +37,7 @@ endif;
 
 if(functionNum == RELEASE_PAGE) then
     alias pageNumber R2;
-    alias memFreeListEntry R3;
+    alias memFreeListEntryAddr R3;
     memFreeListEntryAddr = MEMORY_FREE_LIST + pageNumber;
     [memFreeListEntryAddr] = [memFreeListEntryAddr] - 1;
 
