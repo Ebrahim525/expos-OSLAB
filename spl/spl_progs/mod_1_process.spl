@@ -62,5 +62,43 @@ if(functionNum == FREE_PAGE_TABLE) then
         loop = loop + 2;
     endwhile;
 
+    // Disk Map
+    loop = 2;
+    while(loop < 4) do
+        if([DISK_MAP_TABLE + currentPID * 10 + loop] != -1) then
+            multipush(R1, R2, R3);
+        
+            R1 = RELEASE_BLOCK;
+            R2 = [DISK_MAP_TABLE + currentPID * 10 + loop];
+            call MOD_2;
+
+            multipop(R1, R2, R3);
+        endif;
+
+        loop = loop + 1;
+    endwhile;
+
+    loop = 8;
+    while(loop < 10) do
+        if([DISK_MAP_TABLE + currentPID * 10 + loop] != -1) then
+            multipush(R1, R2, R3);
+        
+            R1 = RELEASE_BLOCK;
+            R2 = [DISK_MAP_TABLE + currentPID * 10 + loop];
+            call MOD_2;
+
+            multipop(R1, R2, R3);
+        endif;
+
+        loop = loop + 1;
+    endwhile;
+
+    loop = 0;
+    while(loop < 10) do
+        [DISK_MAP_TABLE + currentPID * 10 + loop] = -1;
+
+        loop = loop + 1;
+    endwhile;
+
     return;
 endif;

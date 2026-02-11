@@ -38,8 +38,8 @@ endif;
 if(functionNum == RELEASE_PAGE) then
     alias pageNumber R2;
     alias memFreeListEntry R3;
-    memFreeListEntry = [MEMORY_FREE_LIST + pageNumber];
-    memFreeListEntry = memFreeListEntry - 1;
+    memFreeListEntry = MEMORY_FREE_LIST + pageNumber;
+    [memFreeListEntry] = [memFreeListEntry] - 1;
 
     if(memFreeListEntry == 0 && pageNumber != 65 && pageNumber != 66) then
         // Increment in System Status table
@@ -56,6 +56,63 @@ if(functionNum == RELEASE_PAGE) then
 
         processLoop = processLoop + 1;
     endwhile;
+
+    return;
+endif;
+
+if(functionNum == RELEASE_BLOCK) then
+    alias blockNumber R2;
+
+    alias diskfreeListAddr R3;
+    diskfreeListAddr = DISK_FREE_LIST + blockNumber;
+
+    [diskfreeListAddr] = [diskfreeListAddr] - 1;
+
+    return;
+endif;
+
+if(functionNum == GET_CODE_PAGE) then
+    alias currentPID R2;
+    alias blockNumber R3;
+    alias retVal R0;
+
+    alias processLoop R4;
+    alias diskLoop R5;
+    processLoop = 0;
+    while(processLoop < 16) do
+        diskLoop = 0;
+
+        while(diskLoop < 10) do
+            if([DISK_MAP_TABLE + processLoop * 10 + diskLoop] == blockNumber) then //  DO VALID CHECK
+                retVal  = [[PROCESS_TABLE + processLoop * 16 + 14] + 2 * diskLoop];
+                [MEMORY_FREE_LIST + retVal] = [MEMORY_FREE_LIST + retVal] + 1;
+
+                return;
+            endif;
+
+            diskLoop = diskLoop + 1;
+        endwhile;
+
+        processLoop = processLoop + 1;
+    endwhile;
+
+    multipush(R1, R2, R3);
+
+    R1 = GET_FREE_PAGE;
+    R2 = currentPID;
+    call MOD_2;
+
+    multipop(R1, R2, R3);
+
+    multipush(R0, R1, R2, R3);
+
+    R1 = DISK_LOAD;
+    R2 = currentPID;
+    R3 = R0;
+    R4 = blockNumber;
+    call MOD_4;
+
+    multipop(R0, R1, R2, R3);
 
     return;
 endif;

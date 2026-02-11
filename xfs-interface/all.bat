@@ -1,5 +1,5 @@
 load --os /home/expos/myexpos/spl/spl_progs/os_startup.xsm
-load --exhandler /home/expos/myexpos/spl/spl_progs/haltprog.xsm
+load --exhandler /home/expos/myexpos/spl/spl_progs/exception.xsm
 load --int=timer /home/expos/myexpos/spl/spl_progs/timer.xsm
 load --int=disk /home/expos/myexpos/spl/spl_progs/disk.xsm
 load --int=console /home/expos/myexpos/spl/spl_progs/console.xsm

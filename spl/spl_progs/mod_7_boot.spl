@@ -58,6 +58,9 @@ loadi(64,14);
 loadi(59, 3);
 loadi(60, 4);
 
+// Disk Free List
+loadi(61, 2);
+
 
 // INIT Process
 // Loading INIT Code
@@ -116,6 +119,16 @@ while(loop < 16) do
     loop = loop + 1;
 endwhile;
 
+// Disk Map Entry;
+loop = 0;
+while(loop < 10) do
+    [DISK_MAP_TABLE + [SYSTEM_STATUS_TABLE + 1] * 10 + loop] = -1;
+    
+    loop = loop + 1;
+endwhile;
+
+[DISK_MAP_TABLE + [SYSTEM_STATUS_TABLE + 1] * 10 + 4] = 65;
+[DISK_MAP_TABLE + [SYSTEM_STATUS_TABLE + 1] * 10 + 5] = 66;
 
 
 //Setting State of other processes TERMINATED
