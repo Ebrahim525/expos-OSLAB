@@ -79,12 +79,19 @@ if(functionNum == GET_CODE_PAGE) then
     alias processLoop R4;
     alias diskLoop R5;
     processLoop = 0;
+    
     while(processLoop < 16) do
         diskLoop = 0;
 
         while(diskLoop < 10) do
-            if([DISK_MAP_TABLE + processLoop * 10 + diskLoop] == blockNumber) then //  DO VALID CHECK
+            if([DISK_MAP_TABLE + processLoop * 10 + diskLoop] == blockNumber) then
+                //  DO VALID CHECK
                 retVal  = [[PROCESS_TABLE + processLoop * 16 + 14] + 2 * diskLoop];
+                if(retVal == -1) then
+                    diskLoop = diskLoop + 1;
+                    continue;
+                endif;
+
                 [MEMORY_FREE_LIST + retVal] = [MEMORY_FREE_LIST + retVal] + 1;
 
                 return;
@@ -95,7 +102,7 @@ if(functionNum == GET_CODE_PAGE) then
 
         processLoop = processLoop + 1;
     endwhile;
-
+    
     multipush(R1, R2, R3);
 
     R1 = GET_FREE_PAGE;
@@ -108,8 +115,8 @@ if(functionNum == GET_CODE_PAGE) then
 
     R1 = DISK_LOAD;
     R2 = currentPID;
-    R3 = R0;
     R4 = blockNumber;
+    R3 = R0;
     call MOD_4;
 
     multipop(R0, R1, R2, R3);
