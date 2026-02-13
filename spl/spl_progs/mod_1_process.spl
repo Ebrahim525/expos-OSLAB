@@ -48,16 +48,19 @@ if(functionNum == FREE_PAGE_TABLE) then
     
     // Other Entries
     while(loop < 20) do
-        multipush(R1, R2, R3);
-        
-        R1 = RELEASE_PAGE;
-        R2 = [PTBR + loop];
-        call MOD_2;
 
-        multipop(R1, R2, R3);
+        if([PTBR + loop] != -1) then
+            multipush(R1, R2, R3);
+            
+            R1 = RELEASE_PAGE;
+            R2 = [PTBR + loop];
+            call MOD_2;
 
-        [PTBR + loop] = -1;
-        [PTBR + loop + 1] = "0000";
+            multipop(R1, R2, R3);
+
+            [PTBR + loop] = -1;
+            [PTBR + loop + 1] = "0000";
+        endif;
 
         loop = loop + 2;
     endwhile;
