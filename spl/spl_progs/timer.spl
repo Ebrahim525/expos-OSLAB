@@ -18,6 +18,7 @@ process_table_entry = PROCESS_TABLE + currentPID * 16;
 
 // Incrementing Tick
 alias processLoop R0;
+processLoop = 0;
 while( processLoop < MAX_PROC_NUM ) do
     if( [PROCESS_TABLE + processLoop*16 + 4] != TERMINATED) then
         [PROCESS_TABLE + processLoop*16 + 0] = [PROCESS_TABLE + processLoop*16 + 0] + 1;

@@ -1,4 +1,4 @@
-breakpoint;
+
 //MODE Flag
 [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 9] = -1;
 
@@ -84,6 +84,6 @@ restore;
 SP = [PROCESS_TABLE + ( [SYSTEM_STATUS_TABLE + 1] * 16) + 13];
 
 SP = SP + 1;
-[[PTBR + SP / 512] * 512 + SP % 512] = EIP;
+[[PTBR + 2*(SP / 512)] * 512 + SP % 512] = EIP;
 
 ireturn;
