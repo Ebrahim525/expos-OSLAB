@@ -122,7 +122,12 @@ while(loop < 10) do
     loop = loop + 1;
 endwhile;
 
-[DISK_MAP_TABLE + [SYSTEM_STATUS_TABLE + 1] * 10 + 4] = [INODE_TABLE + inodeEntry * 16 + 8];
+loop = 0;
+while(loop < 4) do
+    [DISK_MAP_TABLE + [SYSTEM_STATUS_TABLE + 1] * 10 + 4 + loop] = [INODE_TABLE + inodeEntry * 16 + 8 + loop];
+
+    loop = loop + 1;
+endwhile;
 
 //Setting entry point in user stack
 [[PTBR + 16] * 512] = [[PTBR + 8] * 512 + 1];

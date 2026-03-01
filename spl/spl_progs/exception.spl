@@ -3,7 +3,7 @@
 [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 9] = -1;
 
 //Saving user Stack Pointer
-[PROCESS_TABLE + ( [SYSTEM_STATUS_TABLE + 1] * 16) + 13] = SP;
+[PROCESS_TABLE + ([SYSTEM_STATUS_TABLE + 1] * 16) + 13] = SP;
 
 //Kernel Stack Pointer
 SP = [PROCESS_TABLE + ([SYSTEM_STATUS_TABLE + 1] * 16) + 11] * 512 - 1;
@@ -36,24 +36,19 @@ if(EC != 0 || userSP == PTLR * 512 - 1) then
     call MOD_5;
 endif;
 
-alias currentPID R1;
-currentPID = [SYSTEM_STATUS_TABLE + 1];
-
 if(EPN > 3 && EPN < 8) then
-    alias codeBlock R2;
-    codeBlock = [DISK_MAP_TABLE + currentPID * 10 + EPN];
 
-    multipush(R0, R1, R2);
+    multipush(R0);
 
         R1 = GET_CODE_PAGE;
-        R2 = currentPID;
-        R3 = codeBlock;
+        R2 = [SYSTEM_STATUS_TABLE + 1];
+        R3 = [DISK_MAP_TABLE + [SYSTEM_STATUS_TABLE + 1] * 10 + EPN];
         call MOD_2;
 
-        [PTBR + EPN] = R0; // Memory Page
-        [PTBR + EPN + 1] = "1100"; // Why 1
+        [PTBR + 2*EPN] = R0; // Memory Page
+        [PTBR + 2*EPN + 1] = "1100"; // Why 1
 
-    multipop(R0, R1, R2);
+    multipop(R0);
 endif;
 
 if(EPN > 1 && EPN < 4) then
@@ -63,7 +58,7 @@ if(EPN > 1 && EPN < 4) then
         loop = 4;
         while(loop < 8) do
             R1 = GET_FREE_PAGE;
-            R2 = currentPID;
+            R2 = [SYSTEM_STATUS_TABLE + 1];
             call MOD_2;
             [PTBR + loop] = R0;
             [PTBR + loop + 1] = "1110";
@@ -81,7 +76,7 @@ multipop(EIP);
 
 restore;
 
-SP = [PROCESS_TABLE + ( [SYSTEM_STATUS_TABLE + 1] * 16) + 13];
+SP = [PROCESS_TABLE + ([SYSTEM_STATUS_TABLE + 1] * 16) + 13];
 
 SP = SP + 1;
 [[PTBR + 2*(SP / 512)] * 512 + SP % 512] = EIP;
