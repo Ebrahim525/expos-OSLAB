@@ -16,33 +16,44 @@ int main()
         w = "Enter N: ";
         temp = exposcall("Write", -2, w);
         temp = exposcall("Read", -1, n);
-        breakpoint;
+
         temp = exposcall ("Heapset");
-        /*
         
-        breakpoint;
         temp = exposcall("Read", -1, a);
+        breakpoint;
         head = exposcall ("Alloc",  8);
         breakpoint;
         head.key = a;
         head.next = null;
         curr = head;
+
+        temp = exposcall("Read", -1, a);
         breakpoint;
+        temp2 = exposcall ("Alloc",  8);
+        breakpoint;
+        temp2.key = a;
+        temp2.next = null;
+        curr.next = temp2;
+        curr = temp2;
+        
+        /*
         i = 1;
         while(i < n) do
+            breakpoint;
             temp = exposcall("Read", -1, a);
-            
+            breakpoint;
             temp2 = exposcall ("Alloc",  8);
+            breakpoint;
             temp2.key = a;
             temp2.next = null;
 
             curr.next = temp2;
             curr = temp2;
 
+            breakpoint;
             i = i + 1;
         endwhile;
         
-    breakpoint;
         // Print
         curr = head;
         while(curr != null) do
@@ -60,7 +71,7 @@ int main()
 
             curr = head;
         endwhile;
-*/
+        */
         return 0;
     end
 }
