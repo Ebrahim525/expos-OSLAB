@@ -22,6 +22,10 @@ loadi(15, 28);
 loadi(16, 29);
 loadi(17, 30);
 
+// INT 8 (Fork)
+loadi(18, 31);
+loadi(19, 32);
+
 // INT 9 (Exec)
 loadi(20, 33);
 loadi(21, 34);
@@ -122,13 +126,13 @@ endwhile;
 // Disk Map Entry;
 loop = 0;
 while(loop < 10) do
-    [DISK_MAP_TABLE + [SYSTEM_STATUS_TABLE + 1] * 10 + loop] = -1;
+    [DISK_MAP_TABLE + 10 + loop] = -1;
     
     loop = loop + 1;
 endwhile;
 
-[DISK_MAP_TABLE + [SYSTEM_STATUS_TABLE + 1] * 10 + 4] = 65;
-[DISK_MAP_TABLE + [SYSTEM_STATUS_TABLE + 1] * 10 + 5] = 66;
+[DISK_MAP_TABLE + 10 + 4] = 65;
+[DISK_MAP_TABLE + 10 + 5] = 66;
 
 
 //Setting State of other processes TERMINATED

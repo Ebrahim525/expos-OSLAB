@@ -14,7 +14,7 @@ alias userSP R0;
 userSP = SP;
 
 multipush(EIP);
-
+breakpoint;
 if(EC != 0 || userSP == PTLR * 512 - 1) then
     if(EC == 1) then
         print("Illegal Instruction");
@@ -52,21 +52,19 @@ if(EPN > 3 && EPN < 8) then
 endif;
 
 if(EPN > 1 && EPN < 4) then
-    multipush(R0, R1);
+    multipush(R1, R2);
+        R1 = GET_FREE_PAGE;
+        R2 = [SYSTEM_STATUS_TABLE + 1];
+        call MOD_2;
+        [PTBR + 4] = R0;
+        [PTBR + 5] = "1110";
 
-        alias loop R3;
-        loop = 4;
-        while(loop < 8) do
-            R1 = GET_FREE_PAGE;
-            R2 = [SYSTEM_STATUS_TABLE + 1];
-            call MOD_2;
-            [PTBR + loop] = R0;
-            [PTBR + loop + 1] = "1110";
-
-            loop = loop + 2;
-        endwhile;
-
-    multipop(R0, R1);
+        R1 = GET_FREE_PAGE;
+        R2 = [SYSTEM_STATUS_TABLE + 1];
+        call MOD_2;
+        [PTBR + 6] = R0;
+        [PTBR + 7] = "1110";
+    multipop(R1, R2);
 endif;
 
 //MODE Flag

@@ -5,6 +5,7 @@ load --int=disk /home/expos/myexpos/spl/spl_progs/disk.xsm
 load --int=console /home/expos/myexpos/spl/spl_progs/console.xsm
 load --int=6 /home/expos/myexpos/spl/spl_progs/int_6_read.xsm
 load --int=7 /home/expos/myexpos/spl/spl_progs/int_7_write.xsm
+load --int=8 /home/expos/myexpos/spl/spl_progs/int_8_fork.xsm
 load --int=9 /home/expos/myexpos/spl/spl_progs/int_9_exec.xsm
 load --int=10 /home/expos/myexpos/spl/spl_progs/int_10_exit.xsm
 load --module 0 /home/expos/myexpos/spl/spl_progs/mod_0_resource.xsm

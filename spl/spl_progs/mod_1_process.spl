@@ -1,7 +1,27 @@
 alias functionNum R1;
-alias currentPID R2;
+
+if(functionNum == GET_PCB_ENTRY) then
+    alias processLoop R0;
+    processLoop = 0;
+    while(processLoop < MAX_PROC_NUM) do
+        if([PROCESS_TABLE + processLoop * 16 + 4] == TERMINATED) then
+            [PROCESS_TABLE + processLoop * 16 + 1] = processLoop;
+            [PROCESS_TABLE + processLoop * 16 + 4] = ALLOCATED;
+            [PROCESS_TABLE + processLoop * 16 + 14] = PAGE_TABLE_BASE + processLoop * 20;
+            [PROCESS_TABLE + processLoop * 16 + 15] = 10;
+
+            return;
+        endif;
+
+        processLoop = processLoop + 1;
+    endwhile;
+
+    R0 = -1;
+    return;
+endif;
 
 if(functionNum == FREE_USER_AREA_PAGE) then
+    alias currentPID R2;
     alias userAreaPage R3;
     userAreaPage = [PROCESS_TABLE + currentPID * 16 + 11];
 
@@ -16,6 +36,7 @@ if(functionNum == FREE_USER_AREA_PAGE) then
 endif;
 
 if(functionNum == EXIT_PROCESS) then
+    alias currentPID R2;
     multipush(R1, R2);
     
     R1 = FREE_PAGE_TABLE;
@@ -35,6 +56,7 @@ if(functionNum == EXIT_PROCESS) then
 endif;
 
 if(functionNum == FREE_PAGE_TABLE) then
+    alias currentPID R2;
     alias loop R3;
     loop = 0;
 

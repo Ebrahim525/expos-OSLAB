@@ -3,8 +3,7 @@ alias currentPID R0;
 currentPID = [SYSTEM_STATUS_TABLE + 1];
 
 // Push BP
-SP = SP + 1;
-[SP] = BP;
+multipush(BP);
 
 alias process_table_entry R1;
 process_table_entry = PROCESS_TABLE + currentPID * 16;
@@ -14,6 +13,7 @@ process_table_entry = PROCESS_TABLE + currentPID * 16;
 
 // Looping through the Process Table
 alias newPID R1;
+newPID = 0;
 newPID = currentPID + 1;
 while( newPID < MAX_PROC_NUM ) do
     if( [PROCESS_TABLE + newPID*16 + 4] == READY || [PROCESS_TABLE + newPID*16 + 4] == CREATED ) then
@@ -39,6 +39,7 @@ PTLR = [new_process_table + 15];
 [SYSTEM_STATUS_TABLE + 1] = newPID;
 
 if([new_process_table + 4] == CREATED) then
+    BP = [[new_process_table + 11] * 512];
     SP = [new_process_table + 13];
     [new_process_table + 4] = RUNNING;
     [new_process_table + 9] = 0; //MODE FLAG 
@@ -48,7 +49,6 @@ endif;
 [new_process_table + 4] = RUNNING;
 
 // Restoring BP
-BP = [SP];
-SP = SP - 1;
+multipop(BP);
 
 return;

@@ -1,19 +1,11 @@
-// Change State to TERMINATED
-alias currentPID R0;
-currentPID = [SYSTEM_STATUS_TABLE + 1]; 
-alias process_table_entry R1;
-process_table_entry = PROCESS_TABLE + currentPID * 16;
-[process_table_entry + 4] = TERMINATED;
+//MODE Flag
+[PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 9] = 10;
 
-alias processLoop R0;
-processLoop = 1;
-while( processLoop < MAX_PROC_NUM ) do
-    if( [PROCESS_TABLE + processLoop*16 + 4] != TERMINATED ) then
-        call MOD_5;
-        ireturn;
-    endif;
+// Switch to Kernel Stack
+SP = [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 11] * 512 - 1;
 
-    processLoop = processLoop + 1;
-endwhile;
+R1 = EXIT_PROCESS;
+R2 = [SYSTEM_STATUS_TABLE + 1];
+call MOD_1;
 
-halt;
+call MOD_5;
