@@ -52,6 +52,24 @@ if(functionNum == EXIT_PROCESS) then
     // Set the state as terminated
     [PROCESS_TABLE + currentPID * 16 + 4] = TERMINATED;
 
+    
+    // Setting the child process
+    if([PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 9] != 9) then
+        alias processLoop R3;
+        processLoop = 0;
+        while(processLoop < MAX_PROC_NUM) do
+            if([PROCESS_TABLE + processLoop * 16 + 4] == WAIT_PROCESS && [PROCESS_TABLE + processLoop * 16 + 5] == currentPID) then
+                [PROCESS_TABLE + processLoop * 16 + 4] = READY;
+            endif;
+
+            if([PROCESS_TABLE + processLoop * 16 + 2] == currentPID) then
+                [PROCESS_TABLE + processLoop * 16 + 2] = -1;
+            endif;
+
+            processLoop = processLoop + 1;
+        endwhile;
+    endif;
+
     return;
 endif;
 

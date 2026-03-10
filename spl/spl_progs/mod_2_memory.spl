@@ -79,10 +79,10 @@ if(functionNum == GET_CODE_PAGE) then
     alias processLoop R4;
     alias diskLoop R5;
     processLoop = 0;
-    
+
     while(processLoop < 16) do
         diskLoop = 0;
-
+        
         while(diskLoop < 10) do
             if([DISK_MAP_TABLE + processLoop * 10 + diskLoop] == blockNumber) then
                 //  DO VALID CHECK

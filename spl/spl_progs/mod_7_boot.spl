@@ -30,9 +30,17 @@ loadi(19, 32);
 loadi(20, 33);
 loadi(21, 34);
 
-// INT 10 (After execution)
+// INT 10 (Exit)
 loadi(22,35);
 loadi(23,36);
+
+// INT 11 (Wait, Signal, GetPID, GetPPID)
+loadi(24,37);
+loadi(25,38);
+
+// INT 15 (Shutdown)
+loadi(32,45);
+loadi(33,46);
 
 // Module 0 (Terminal Acquire and Release)
 loadi(40, 53);
@@ -131,8 +139,8 @@ while(loop < 10) do
     loop = loop + 1;
 endwhile;
 
-[DISK_MAP_TABLE + 10 + 4] = 65;
-[DISK_MAP_TABLE + 10 + 5] = 66;
+[DISK_MAP_TABLE + 10 + 4] = 7;
+[DISK_MAP_TABLE + 10 + 5] = 8;
 
 
 //Setting State of other processes TERMINATED

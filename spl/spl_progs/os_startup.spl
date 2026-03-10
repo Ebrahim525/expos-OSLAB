@@ -53,8 +53,16 @@ PTBR = PAGE_TABLE_BASE;
 [PROCESS_TABLE + 14] = PAGE_TABLE_BASE; // PTBR
 [PROCESS_TABLE + 15] = 10; // PTLR
 
-[DISK_MAP_TABLE + 10] = 69;
-[DISK_MAP_TABLE + 10] = 70;
+alias loop R0;
+loop = 0;
+while(loop < 10) do
+    [DISK_MAP_TABLE + loop] = -1;
+    
+    loop = loop + 1;
+endwhile;
+
+[DISK_MAP_TABLE + 4] = 11;
+[DISK_MAP_TABLE + 5] = 12;
 
 // Setting PID Number in System Status Table
 [SYSTEM_STATUS_TABLE + 1] = 0;
