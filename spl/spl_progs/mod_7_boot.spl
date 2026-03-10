@@ -131,8 +131,8 @@ while(loop < 10) do
     loop = loop + 1;
 endwhile;
 
-[DISK_MAP_TABLE + 10 + 4] = 65;
-[DISK_MAP_TABLE + 10 + 5] = 66;
+[DISK_MAP_TABLE + 10 + 4] = 7;
+[DISK_MAP_TABLE + 10 + 5] = 8;
 
 
 //Setting State of other processes TERMINATED
