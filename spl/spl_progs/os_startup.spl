@@ -53,6 +53,9 @@ PTBR = PAGE_TABLE_BASE;
 [PROCESS_TABLE + 14] = PAGE_TABLE_BASE; // PTBR
 [PROCESS_TABLE + 15] = 10; // PTLR
 
+[DISK_MAP_TABLE + 10] = 69;
+[DISK_MAP_TABLE + 10] = 70;
+
 // Setting PID Number in System Status Table
 [SYSTEM_STATUS_TABLE + 1] = 0;
 
