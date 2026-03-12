@@ -4,7 +4,6 @@ int main() {
     enddecl
     
     begin
-    
         pid = exposcall("Getpid");
         temp = exposcall("Write", -2, pid);
 
