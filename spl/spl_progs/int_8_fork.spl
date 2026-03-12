@@ -79,7 +79,26 @@ multipop(R1, R2);
 [PROCESS_TABLE + newPid * 16 + 13] = [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 13]; // UPTR
 
 
-// Per Process Table?
+// Per Process Table
+alias parentUserArea R3;
+alias childUserArea R4;
+parentUserArea = (([PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 11] + 1) * 512) - 16;
+childUserArea = (([PROCESS_TABLE + newPid * 16 + 11] + 1) * 512) -16;
+alias loop R5;
+loop = 0;
+while(loop < 16) do
+    [childUserArea + loop + 0] = [parentUserArea + loop + 0];
+    [childUserArea + loop + 1] = [parentUserArea + loop + 1];
+ 
+    if([parentUserArea + loop + 0] == SEMAPHORE) then
+        alias processCountAddr R6;
+        processCountAddr = SEMAPHORE_TABLE + [parentUserArea + loop + 1] * 4 + 1;
+        [processCountAddr] = [processCountAddr] + 1;
+    endif;
+
+    loop = loop + 2;
+endwhile;
+
 
 
 // Disk Map Entry
@@ -110,10 +129,7 @@ parentUserStack = [PTBR + 16] * 512;
 childUserStack = [PAGE_TABLE_BASE + newPid * 20 + 16] * 512;
 loop = 0;
 while(loop < 1024) do
-    [childUserStack] = [parentUserStack];
-
-    childUserStack = childUserStack + 1;
-    parentUserStack = parentUserStack + 1;
+    [childUserStack + loop] = [parentUserStack + loop];
     
     loop = loop + 1;
 endwhile;

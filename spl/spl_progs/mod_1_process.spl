@@ -32,6 +32,26 @@ if(functionNum == FREE_USER_AREA_PAGE) then
     call MOD_2;
 
     multipop(R1, R2, R3);
+
+    // Semaphore
+    alias perProcessTable R4;
+    perProcessTable = ((userAreaPage + 1) * 512) - 16;
+    
+    alias loop R5;
+    loop = 0;
+    while(loop < 16) do
+        if([perProcessTable + loop + 0] == SEMAPHORE) then
+            multipush(R1, R2, R3, R4, R5);
+
+            R1 = RELEASE_SEMAPHORE;
+            R3 = loop;
+
+            multipop(R1, R2, R3, R4, R5);
+        endif;
+
+        loop = loop + 2;
+    endwhile;
+
     return;
 endif;
 

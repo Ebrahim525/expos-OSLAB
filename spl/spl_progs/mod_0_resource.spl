@@ -21,6 +21,46 @@ if(functionNum == ACQUIRE_DISK) then
     return; 
 endif;
 
+if(functionNum == ACQUIRE_SEMAPHORE) then
+    alias loop R0;
+    loop = 0;
+    while(loop < MAX_SEM_COUNT) do
+        if([SEMAPHORE_TABLE + loop * 4 + 2] == 0) then
+            break;
+        endif;
+    endwhile;
+    if(loop == MAX_SEM_COUNT) then
+        loop = -1;
+
+        return;
+    endif;
+
+    [SEMAPHORE_TABLE + loop * 4 + 0] = -1;
+    [SEMAPHORE_TABLE + loop * 4 + 1] = 1;
+
+    return;
+endif;
+
+if(functionNum == RELEASE_SEMAPHORE) then
+    alias semDesc R3;
+
+    if([SEMAPHORE_TABLE + semDesc * 4 + 0] != -1) then
+        [SEMAPHORE_TABLE + semDesc * 4 + 0] = -1;
+
+        alias processLoop R4;
+        processLoop = 0;
+        while(processLoop < MAX_PROC_NUM) do
+            if([PROCESS_TABLE + processLoop * 16 + 4] == WAIT_SEMAPHORE && [PROCESS_TABLE + processLoop * 16 + 5] == semDesc) then
+                [PROCESS_TABLE + processLoop * 16 + 4] == READY;
+            endif;
+
+            processLoop = processLoop + 1;
+        endwhile;
+    endif;
+
+    [SEMAPHORE_TABLE + semDesc * 4 + 1] = [SEMAPHORE_TABLE + semDesc * 4 + 1] - 1;
+endif;
+
 if( functionNum == ACQUIRE_TERMINAL ) then
     alias terminalPID R3;
 

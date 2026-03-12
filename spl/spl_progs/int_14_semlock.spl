@@ -1,0 +1,105 @@
+alias userSP R1;
+userSP = SP;
+
+[PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 13] = SP;
+SP = [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 11] * 512 - 1;
+
+alias systemCall R2;
+systemCall = [[PTBR + 2 * (userSP-5) / 512] * 512 + (userSP-5) % 512];
+
+[PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 9] = systemCall;
+
+alias retValAddr R3;
+retValAddr = [PTBR + 2 * (userSP-1) / 512] * 512 + (userSP-1) % 512;
+
+
+if(systemCall == INT_SEMLOCK) then
+    alias semDesc R4;
+    semDesc = [[PTBR + 2 * (userSP-4) / 512] * 512 + (userSP-4) % 512];
+
+    alias loop R5;
+    loop = 0;
+    while(loop < 16) do
+        if([perProcessTable + loop + 1] == semDesc) then
+            break;
+        endif;
+
+        loop = loop + 2;
+    endwhile;
+    if(loop == 16) then
+        [retValAddr] = -1;
+
+        ireturn;
+    endif;
+
+    while([SEMAPHORE_TABLE + semDesc * 4 + 0] != -1) do
+        [PROCESS_TABLE + processLoop * 16 + 4] = WAIT_SEMAPHORE;
+        [PROCESS_TABLE + processLoop * 16 + 5] = semDesc;
+
+        multipush(R1, R2, R3, R4, R5);
+            
+        call MOD_5;
+        
+        multipop(R1, R2, R3, R4, R5);
+    endwhile;
+
+    [SEMAPHORE_TABLE + semDesc * 4 + 0] = [SYSTEM_STATUS_TABLE + 1];
+
+    [retValAddr] = 0;
+
+endif;
+
+if(systemCall == INT_SEMUNLOCK) then
+    alias semDesc R4;
+    semDesc = [[PTBR + 2 * (userSP-4) / 512] * 512 + (userSP-4) % 512];
+
+    if(semDesc < 0 || semDesc > 8) then
+        [retValAddr] = -1;
+
+        ireturn;
+    endif;
+
+    alias loop R5;
+    loop = 0;
+    while(loop < 16) do
+        if([perProcessTable + loop + 1] == semDesc) then
+            break;
+        endif;
+
+        loop = loop + 2;
+    endwhile;
+    if(loop == 16) then
+        [retValAddr] = -1;
+
+        ireturn;
+    endif;
+
+    if([SEMAPHORE_TABLE + semDesc * 4 + 0] != -1) then
+        if([SEMAPHORE_TABLE + semDesc * 4 + 0] != [SYSTEM_STATUS_TABLE + 1]) then
+            [retValAddr] = -2;
+
+            return;
+        endif;
+
+        [SEMAPHORE_TABLE + semDesc * 4 + 0] = -1;
+
+        alias processLoop;
+        processLoop = 0;
+        while(processLoop < MAX_PROC_NUM) do
+            if([PROCESS_TABLE + processLoop * 16 + 4] == WAIT_SEMAPHORE && [PROCESS_TABLE + processLoop * 16 + 5] == semDesc) then
+                [PROCESS_TABLE + processLoop * 16 + 4] = READY;
+            endif;
+
+            processLoop = processLoop + 1;
+        endwhile;
+    endif;
+
+    [retValAddr] = 0;
+endif;
+
+
+[PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 9] = 0;
+SP = [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 13];
+
+
+ireturn;
