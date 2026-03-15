@@ -1,10 +1,12 @@
-[PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 9] = 8;
+alias currentPID R10;
+currentPID = [SYSTEM_STATUS_TABLE + 1];
+[PROCESS_TABLE + currentPID * 16 + 9] = 8;
 
 alias retValAddr R2;
 retValAddr = [PTBR + 2 * (SP - 1)/512] * 512 + (SP - 1) % 512;
 
-[PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 13] = SP;
-SP = [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 11] * 512 - 1;
+[PROCESS_TABLE + currentPID * 16 + 13] = SP;
+SP = [PROCESS_TABLE + currentPID * 16 + 11] * 512 - 1;
 
 // Getting PID for the child process
 R1 = GET_PCB_ENTRY;
@@ -13,11 +15,9 @@ call MOD_1;
 alias newPid R1;
 newPid = R0;
 
-[retValAddr] = newPid;
-
 if(newPid == -1) then
-    [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 9] = 0;
-    SP = [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 13];
+    [PROCESS_TABLE + currentPID * 16 + 9] = 0;
+    SP = [PROCESS_TABLE + currentPID * 16 + 13];
     [retValAddr] = -1;
     
     ireturn;
@@ -28,13 +28,13 @@ endif;
 if([PTBR + 4] == -1) then
     multipush(R1, R2);
         R1 = GET_FREE_PAGE;
-        R2 = [SYSTEM_STATUS_TABLE + 1];
+        R2 = currentPID;
         call MOD_2;
         [PTBR + 4] = R0;
         [PTBR + 5] = "0110";
 
         R1 = GET_FREE_PAGE;
-        R2 = [SYSTEM_STATUS_TABLE + 1];
+        R2 = currentPID;
         call MOD_2;
         [PTBR + 6] = R0;
         [PTBR + 7] = "0110";
@@ -45,7 +45,7 @@ endif;
 // User Area Page for child
 multipush(R1, R2);
         R1 = GET_FREE_PAGE;
-        R2 = [SYSTEM_STATUS_TABLE + 1];
+        R2 = currentPID;
         call MOD_2;
 multipop(R1, R2);
 [PROCESS_TABLE + newPid * 16 + 11] = R0; // User Area Page
@@ -54,7 +54,7 @@ multipop(R1, R2);
 // Stack
 multipush(R1, R2);
     R1 = GET_FREE_PAGE;
-    R2 = [SYSTEM_STATUS_TABLE + 1];
+    R2 = currentPID;
     call MOD_2;
 multipop(R1, R2);
 [PAGE_TABLE_BASE + newPid * 20 + 16] = R0;
@@ -62,7 +62,7 @@ multipop(R1, R2);
 
 multipush(R1, R2);
     R1 = GET_FREE_PAGE;
-    R2 = [SYSTEM_STATUS_TABLE + 1];
+    R2 = currentPID;
     call MOD_2;
 multipop(R1, R2);
 [PAGE_TABLE_BASE + newPid * 20 + 18] = R0;
@@ -70,21 +70,21 @@ multipop(R1, R2);
 
 
 [PROCESS_TABLE + newPid * 16 + 0] = 0; // TICK
-[PROCESS_TABLE + newPid * 16 + 2] = [SYSTEM_STATUS_TABLE + 1]; // PPID
-[PROCESS_TABLE + newPid * 16 + 3] = [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 3]; // UserId
+[PROCESS_TABLE + newPid * 16 + 2] = currentPID; // PPID
+[PROCESS_TABLE + newPid * 16 + 3] = [PROCESS_TABLE + currentPID * 16 + 3]; // UserId
 [PROCESS_TABLE + newPid * 16 + 4] = CREATED; // State
-[PROCESS_TABLE + newPid * 16 + 6] = [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 6]; // Swap Flag
-[PROCESS_TABLE + newPid * 16 + 7] = [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 7]; // Inode
+[PROCESS_TABLE + newPid * 16 + 6] = [PROCESS_TABLE + currentPID * 16 + 6]; // Swap Flag
+[PROCESS_TABLE + newPid * 16 + 7] = [PROCESS_TABLE + currentPID * 16 + 7]; // Inode
 [PROCESS_TABLE + newPid * 16 + 9] = 0; // Mode Flag
-[PROCESS_TABLE + newPid * 16 + 10] = [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 10]; // USER AREA SWAP STATUS
+[PROCESS_TABLE + newPid * 16 + 10] = [PROCESS_TABLE + currentPID * 16 + 10]; // USER AREA SWAP STATUS
 [PROCESS_TABLE + newPid * 16 + 12] = 0; // KPTR
-[PROCESS_TABLE + newPid * 16 + 13] = [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 13]; // UPTR
+[PROCESS_TABLE + newPid * 16 + 13] = [PROCESS_TABLE + currentPID * 16 + 13]; // UPTR
 
 
 // Per Process Table
 alias parentUserArea R3;
 alias childUserArea R4;
-parentUserArea = (([PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 11] + 1) * 512) - 16;
+parentUserArea = (([PROCESS_TABLE + currentPID * 16 + 11] + 1) * 512) - 16;
 childUserArea = (([PROCESS_TABLE + newPid * 16 + 11] + 1) * 512) -16;
 alias loop R5;
 loop = 0;
@@ -107,19 +107,20 @@ endwhile;
 alias diskLoop R3;
 diskLoop = 0;
 while(diskLoop < 10) do
-    [DISK_MAP_TABLE + newPid * 10 + diskLoop] = [DISK_MAP_TABLE + [SYSTEM_STATUS_TABLE + 1] * 10 + diskLoop];
+    [DISK_MAP_TABLE + newPid * 10 + diskLoop] = [DISK_MAP_TABLE + currentPID * 10 + diskLoop];
 
     diskLoop = diskLoop + 1;
 endwhile;
 
 
 // Page Table
-alias loop R3;
 loop = 0;
 while(loop < 16) do
-    [PAGE_TABLE_BASE + newPid * 20 + loop] = [PTBR + loop];
-    [PAGE_TABLE_BASE + newPid * 20 + loop + 1] = [PTBR + loop + 1];
-    [MEMORY_FREE_LIST + [PTBR + loop]] = [MEMORY_FREE_LIST + [PTBR + loop]] + 1;
+        [PAGE_TABLE_BASE + newPid * 20 + loop] = [PTBR + loop];
+        [PAGE_TABLE_BASE + newPid * 20 + loop + 1] = [PTBR + loop + 1];
+    if([PTBR + loop] != -1) then
+        [MEMORY_FREE_LIST + [PTBR + loop]] = [MEMORY_FREE_LIST + [PTBR + loop]] + 1;
+    endif;
 
     loop = loop + 2;
 endwhile;
@@ -129,13 +130,22 @@ alias parentUserStack R4;
 alias childUserStack R5;
 parentUserStack = [PTBR + 16] * 512;
 childUserStack = [PAGE_TABLE_BASE + newPid * 20 + 16] * 512;
+alias loop R6;
 loop = 0;
-while(loop < 1024) do
+while(loop < 512) do
     [childUserStack + loop] = [parentUserStack + loop];
     
     loop = loop + 1;
 endwhile;
+parentUserStack = [PTBR + 18] * 512;
+childUserStack = [PAGE_TABLE_BASE + newPid * 20 + 18] * 512;
+loop = 0;
+while(loop < 512) do
+    [childUserStack + loop] = [parentUserStack + loop];
 
+    loop = loop + 1;
+endwhile;
+breakpoint;
 
 alias childKernalstack R4;
 childKernalstack = [PROCESS_TABLE + newPid * 16 + 11] * 512 - 1;
@@ -144,6 +154,7 @@ multipush(BP);
 
 
 // Setting return value for child
+[retValAddr] = newPid;
 alias newSP R4;
 newSP = [PROCESS_TABLE + newPid * 16 + 13];
 alias newPTBR R5;
@@ -152,7 +163,7 @@ retValAddr = [newPTBR + 2 * (newSP - 1)/512] * 512 + (newSP - 1) % 512;
 [retValAddr] = 0;
 
 
-SP = [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 13];
-[PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 9] = 0;
+SP = [PROCESS_TABLE + currentPID * 16 + 13];
+[PROCESS_TABLE + currentPID * 16 + 9] = 0;
 
 ireturn;

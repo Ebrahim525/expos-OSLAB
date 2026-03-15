@@ -39,17 +39,19 @@ if(functionNum == FREE_USER_AREA_PAGE) then
     
     alias loop R5;
     loop = 0;
-    while(loop < 16) do
-        if([perProcessTable + loop + 0] == SEMAPHORE) then
+    while(loop < 8) do
+        if([perProcessTable + loop * 2 + 0] == SEMAPHORE) then
             multipush(R1, R2, R3, R4, R5);
 
             R1 = RELEASE_SEMAPHORE;
-            R3 = loop;
+            R2 = currentPID;
+            R3 = [perProcessTable + loop * 2 + 1];
+            call MOD_0;
 
             multipop(R1, R2, R3, R4, R5);
         endif;
 
-        loop = loop + 2;
+        loop = loop + 1;
     endwhile;
 
     return;
@@ -108,16 +110,18 @@ if(functionNum == FREE_PAGE_TABLE) then
     
     // Other Entries
     while(loop < 20) do
-        multipush(R1, R2, R3);
-        
-        R1 = RELEASE_PAGE;
-        R2 = [PTBR + loop];
-        call MOD_2;
+        if([PTBR + loop] != -1) then
+            multipush(R1, R2, R3);
+            
+            R1 = RELEASE_PAGE;
+            R2 = [PTBR + loop];
+            call MOD_2;
 
-        multipop(R1, R2, R3);
+            multipop(R1, R2, R3);
 
-        [PTBR + loop] = -1;
-        [PTBR + loop + 1] = "0000";
+            [PTBR + loop] = -1;
+            [PTBR + loop + 1] = "0000";
+        endif;
 
         loop = loop + 2;
     endwhile;

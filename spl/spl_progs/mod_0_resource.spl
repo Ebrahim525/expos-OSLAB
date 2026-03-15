@@ -25,9 +25,11 @@ if(functionNum == ACQUIRE_SEMAPHORE) then
     alias loop R0;
     loop = 0;
     while(loop < MAX_SEM_COUNT) do
-        if([SEMAPHORE_TABLE + loop * 4 + 2] == 0) then
+        if([SEMAPHORE_TABLE + loop * 4 + 1] == 0) then
             break;
         endif;
+
+        loop = loop + 1;
     endwhile;
     if(loop == MAX_SEM_COUNT) then
         loop = -1;
@@ -44,14 +46,14 @@ endif;
 if(functionNum == RELEASE_SEMAPHORE) then
     alias semDesc R3;
 
-    if([SEMAPHORE_TABLE + semDesc * 4 + 0] != -1) then
+    if([SEMAPHORE_TABLE + semDesc * 4 + 0] == currentPID) then
         [SEMAPHORE_TABLE + semDesc * 4 + 0] = -1;
 
         alias processLoop R4;
         processLoop = 0;
         while(processLoop < MAX_PROC_NUM) do
             if([PROCESS_TABLE + processLoop * 16 + 4] == WAIT_SEMAPHORE && [PROCESS_TABLE + processLoop * 16 + 5] == semDesc) then
-                [PROCESS_TABLE + processLoop * 16 + 4] == READY;
+                [PROCESS_TABLE + processLoop * 16 + 4] = READY;
             endif;
 
             processLoop = processLoop + 1;
@@ -59,6 +61,8 @@ if(functionNum == RELEASE_SEMAPHORE) then
     endif;
 
     [SEMAPHORE_TABLE + semDesc * 4 + 1] = [SEMAPHORE_TABLE + semDesc * 4 + 1] - 1;
+
+    return;
 endif;
 
 if( functionNum == ACQUIRE_TERMINAL ) then
