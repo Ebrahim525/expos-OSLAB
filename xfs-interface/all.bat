@@ -3,6 +3,7 @@ load --exhandler /home/expos/myexpos/spl/spl_progs/exception.xsm
 load --int=timer /home/expos/myexpos/spl/spl_progs/timer.xsm
 load --int=disk /home/expos/myexpos/spl/spl_progs/disk.xsm
 load --int=console /home/expos/myexpos/spl/spl_progs/console.xsm
+load --int=4 /home/expos/myexpos/spl/spl_progs/int_4_file.xsm
 load --int=6 /home/expos/myexpos/spl/spl_progs/int_6_read.xsm
 load --int=7 /home/expos/myexpos/spl/spl_progs/int_7_write.xsm
 load --int=8 /home/expos/myexpos/spl/spl_progs/int_8_fork.xsm

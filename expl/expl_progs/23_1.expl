@@ -1,8 +1,8 @@
 int main()
 {
     decl
-        int temp;
-        string fileName, permission, w;
+        int temp, permission;
+        string fileName, w;
     enddecl
 
     begin

@@ -1,22 +1,26 @@
 alias userSP R1;
 userSP = SP;
 
-[PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 13] = SP;
-SP = [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 11] * 512 - 1;
+alias currentPID R8;
+currentPID = [SYSTEM_STATUS_TABLE + 1];
+
+[PROCESS_TABLE + currentPID * 16 + 13] = SP;
+SP = [PROCESS_TABLE + currentPID * 16 + 11] * 512 - 1;
 
 alias systemCall R2;
 systemCall = [[PTBR + 2 * (userSP-5) / 512] * 512 + (userSP-5) % 512];
 
-[PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 9] = systemCall;
+[PROCESS_TABLE + currentPID * 16 + 9] = systemCall;
 
 alias retValAddr R3;
 retValAddr = [PTBR + 2 * (userSP-1) / 512] * 512 + (userSP-1) % 512;
 
+alias fileName R4;
+fileName = [[PTBR + 2 * (userSP-4) / 512] * 512 + (userSP-4) % 512];
+
 
 if(systemCall == INT_CREATE) then
-    alias fileName R4;
     alias permission R5;
-    fileName = [[PTBR + 2 * (userSP-4) / 512] * 512 + (userSP-4) % 512];
     permission = [[PTBR + 2 * (userSP-3) / 512] * 512 + (userSP-3) % 512];
 
     alias inodeLoop R6;
@@ -24,8 +28,8 @@ if(systemCall == INT_CREATE) then
     while(inodeLoop < MAX_FILE_NUM) do
         if([INODE_TABLE + inodeLoop * 16 + 1] == fileName) then
             [retValAddr] = 0;
-            [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 9] = 0;
-            SP = [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 13];
+            [PROCESS_TABLE + currentPID * 16 + 9] = 0;
+            SP = [PROCESS_TABLE + currentPID * 16 + 13];
 
             ireturn;
         endif;
@@ -45,39 +49,40 @@ if(systemCall == INT_CREATE) then
     endwhile;
     if(inodeLoop == MAX_FILE_NUM) then
         [retValAddr] = -1;
-        [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 9] = 0;
-        SP = [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 13];
+        [PROCESS_TABLE + currentPID * 16 + 9] = 0;
+        SP = [PROCESS_TABLE + currentPID * 16 + 13];
 
         ireturn;
     endif;
 
 
     // Inode Table Entry
-    [INODE_TABLE + freeEntry * 16 + 0] = DATA;
-    [INODE_TABLE + freeEntry * 16 + 1] = fileName;
-    [INODE_TABLE + freeEntry * 16 + 2] = 0;
-    [INODE_TABLE + freeEntry * 16 + 3] = [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 3];
-    [INODE_TABLE + freeEntry * 16 + 4] = permission;
-    [INODE_TABLE + freeEntry * 16 + 8] = -1;
-    [INODE_TABLE + freeEntry * 16 + 9] = -1;
-    [INODE_TABLE + freeEntry * 16 + 10] = -1;
-    [INODE_TABLE + freeEntry * 16 + 11] = -1;
+    alias inodeEntry R9;
+    inodeEntry = INODE_TABLE + freeEntry * 16;
+    [inodeEntry + 0] = DATA;
+    [inodeEntry + 1] = fileName;
+    [inodeEntry + 2] = 0;
+    [inodeEntry + 3] = [PROCESS_TABLE + currentPID * 16 + 3];
+    [inodeEntry + 4] = permission;
+    [inodeEntry + 8] = -1;
+    [inodeEntry + 9] = -1;
+    [inodeEntry + 10] = -1;
+    [inodeEntry + 11] = -1;
 
 
     // Root File Entry
-    [ROOT_FILE + freeEntry * 8 + 0] = fileName;
-    [ROOT_FILE + freeEntry * 8 + 1] = 0;
-    [ROOT_FILE + freeEntry * 8 + 2] = DATA;
-    [ROOT_FILE + freeEntry * 8 + 3] = [USER_TABLE + [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 3] * 2 + 0];
-    [ROOT_FILE + freeEntry * 8 + 4] = permission;
+    alias rootEntry R9;
+    rootEntry = ROOT_FILE + freeEntry * 8;
+    [rootEntry + 0] = fileName;
+    [rootEntry + 1] = 0;
+    [rootEntry + 2] = DATA;
+    [rootEntry + 3] = [USER_TABLE + [PROCESS_TABLE + currentPID * 16 + 3] * 2 + 0];
+    [rootEntry + 4] = permission;
 
     [retValAddr] = 0;
 endif;
 
 if(systemCall == INT_DELETE) then
-    alias fileName R4;
-    fileName = [[PTBR + 2 * (userSP-4) / 512] * 512 + (userSP-4) % 512];
-
     alias inodeLoop R5;
     inodeLoop = 0;
     while(inodeLoop < MAX_FILE_NUM) do
@@ -89,22 +94,22 @@ if(systemCall == INT_DELETE) then
     endwhile;
     if(inodeLoop == MAX_FILE_NUM) then
         [retValAddr] = 0;
-        [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 9] = 0;
-        SP = [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 13];
+        [PROCESS_TABLE + currentPID * 16 + 9] = 0;
+        SP = [PROCESS_TABLE + currentPID * 16 + 13];
 
         ireturn;
     endif;
     if([INODE_TABLE + inodeLoop * 16 + 2] != DATA) then    
         [retValAddr] = -1;
-        [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 9] = 0;
-        SP = [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 13];
+        [PROCESS_TABLE + currentPID * 16 + 9] = 0;
+        SP = [PROCESS_TABLE + currentPID * 16 + 13];
 
         ireturn;
     endif;
-    if([INODE_TABLE + inodeLoop * 16 + 4] == EXCLUSIVE && [INODE_TABLE + inodeLoop * 16 + 3] != [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 3] && [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 3] != ROOT) then
+    if([INODE_TABLE + inodeLoop * 16 + 4] == EXCLUSIVE && [INODE_TABLE + inodeLoop * 16 + 3] != [PROCESS_TABLE + currentPID * 16 + 3] && [PROCESS_TABLE + currentPID * 16 + 3] != ROOT) then
             [retValAddr] = -1;
-            [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 9] = 0;
-            SP = [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 13];
+            [PROCESS_TABLE + currentPID * 16 + 9] = 0;
+            SP = [PROCESS_TABLE + currentPID * 16 + 13];
 
             ireturn;
     endif;
@@ -112,7 +117,7 @@ if(systemCall == INT_DELETE) then
     multipush(R1, R2, R3, R4, R5);
 
     R1 = ACQUIRE_INODE;
-    R2 = [SYSTEM_STATUS_TABLE + 1];
+    R2 = currentPID;
     R3 = inodeLoop;
     call MOD_0;
 
@@ -122,15 +127,15 @@ if(systemCall == INT_DELETE) then
         multipush(R1, R2, R3, R4, R5);
 
         R1 = RELEASE_INODE;
-        R2 = [SYSTEM_STATUS_TABLE + 1];
+        R2 = currentPID;
         R3 = inodeLoop;
         call MOD_0;
 
         multipop(R1, R2, R3, R4, R5);
 
         [retValAddr] = -2;
-        [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 9] = 0;
-        SP = [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 13];
+        [PROCESS_TABLE + currentPID * 16 + 9] = 0;
+        SP = [PROCESS_TABLE + currentPID * 16 + 13];
         
         ireturn;
     endif;
@@ -160,7 +165,7 @@ if(systemCall == INT_DELETE) then
     multipush(R1, R2, R3, R4, R5);
 
     R1 = RELEASE_INODE;
-    R2 = [SYSTEM_STATUS_TABLE + 1];
+    R2 = currentPID;
     R3 = inodeLoop;
     call MOD_0;
 
@@ -171,8 +176,8 @@ endif;
 
 
 
-[PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 9] = 0;
-SP = [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 13];
+[PROCESS_TABLE + currentPID * 16 + 9] = 0;
+SP = [PROCESS_TABLE + currentPID * 16 + 13];
 
 
 ireturn;
