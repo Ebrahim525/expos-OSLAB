@@ -11,7 +11,7 @@ loadi(70, 12);
 SP = 82 * 512 - 1;
 
 call BOOT_MODULE;
-breakpoint;
+
 
 // Idle Process
 PTBR = PAGE_TABLE_BASE;

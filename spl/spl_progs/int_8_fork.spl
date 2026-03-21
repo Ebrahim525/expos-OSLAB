@@ -145,7 +145,7 @@ while(loop < 512) do
 
     loop = loop + 1;
 endwhile;
-breakpoint;
+
 
 alias childKernalstack R4;
 childKernalstack = [PROCESS_TABLE + newPid * 16 + 11] * 512 - 1;

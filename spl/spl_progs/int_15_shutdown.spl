@@ -23,7 +23,7 @@ R4 = 3;
 call MOD_4;
 R1 = DISK_STORE;
 R2 = [SYSTEM_STATUS_TABLE + 1];
-R3 = 59;
+R3 = 60;
 R4 = 4;
 call MOD_4;
 
