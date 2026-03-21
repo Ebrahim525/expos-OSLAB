@@ -165,7 +165,7 @@ int main()
       p=p.next;
     endwhile;
 
-    x = exposcall("Semrelease");
+    x = exposcall("Semrelease", semid);
     return 1;
   end
 }

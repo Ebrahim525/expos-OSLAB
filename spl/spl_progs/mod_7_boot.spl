@@ -14,6 +14,10 @@ loadi(7, 20);
 loadi(8, 21);
 loadi(9, 22);
 
+// INT 4 (Create, Delete)
+loadi(10, 23);
+loadi(11, 24);
+
 // INT 6 (Read)
 loadi(14, 27);
 loadi(15, 28);
@@ -78,6 +82,9 @@ loadi(64,14);
 loadi(59, 3);
 loadi(60, 4);
 
+// Root File
+loadi(62, 5);
+
 // Disk Free List
 loadi(61, 2);
 
@@ -120,6 +127,7 @@ PTBR = PAGE_TABLE_BASE + 20;
 // Setting User Area Page Number in Process Table
 [PROCESS_TABLE + 16 + 0] = 0; // TICK
 [PROCESS_TABLE + 16 + 1] = 1; // PID
+[PROCESS_TABLE + 16 + 3] = ROOT; // UserID
 [PROCESS_TABLE + 16 + 4] = CREATED; // State
 [PROCESS_TABLE + 16 + 11] = 80; // User Area Page
 [PROCESS_TABLE + 16 + 12] = 0; // KPTR
@@ -199,5 +207,25 @@ endwhile;
 
 // Disk Status Table
 [DISK_STATUS_TABLE + 0] = 0;
+
+// File Status Table
+alias loop R0;
+loop = 0;
+while(loop < MAX_FILE_NUM) do
+    [FILE_STATUS_TABLE + loop * 4 + 0] = -1;
+    [FILE_STATUS_TABLE + loop * 4 + 1] = -1;
+
+    loop = loop + 1;
+endwhile;
+
+// Buffer Table
+loop = 0;
+while(loop < MAX_BUFFER) do
+    [BUFFER_TABLE + loop * 4 + 0] = -1;
+    [BUFFER_TABLE + loop * 4 + 1] = 0;
+    [BUFFER_TABLE + loop * 4 + 2] = -1;
+
+    loop = loop + 1;
+endwhile;
 
 return;

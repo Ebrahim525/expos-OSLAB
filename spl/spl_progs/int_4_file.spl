@@ -1,0 +1,160 @@
+alias userSP R1;
+userSP = SP;
+
+[PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 13] = SP;
+SP = [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 11] * 512 - 1;
+
+alias systemCall R2;
+systemCall = [[PTBR + 2 * (userSP-5) / 512] * 512 + (userSP-5) % 512];
+
+[PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 9] = systemCall;
+
+alias retValAddr R3;
+retValAddr = [PTBR + 2 * (userSP-1) / 512] * 512 + (userSP-1) % 512;
+
+
+if(systemCall == INT_CREATE) then
+    alias fileName R4;
+    alias permission R5;
+    fileName = [[PTBR + 2 * (userSP-4) / 512] * 512 + (userSP-4) % 512];
+    permission = [[PTBR + 2 * (userSP-3) / 512] * 512 + (userSP-3) % 512];
+
+    alias inodeLoop R6;
+    inodeLoop = 0;
+    while(inodeLoop < MAX_FILE_NUM) do
+        if([INODE_TABLE + inodeLoop * 16 + 1] == fileName) then
+            [retValAddr] = 0;
+            ireturn;
+        endif;
+
+        inodeLoop = inodeLoop + 1;
+    endwhile;
+
+    alias freeEntry R7;
+    inodeLoop = 0;
+    while(inodeLoop < MAX_FILE_NUM) do
+        if([INODE_TABLE + inodeLoop * 16 + 1] == -1) then
+            freeEntry = inodeLoop;
+            break;
+        endif;
+
+        inodeLoop = inodeLoop + 1;
+    endwhile;
+    if(inodeLoop == MAX_FILE_NUM) then
+        [retValAddr] = -1;
+        ireturn;
+    endif;
+
+
+    // Inode Table Entry
+    [INODE_TABLE + freeEntry * 16 + 0] = DATA;
+    [INODE_TABLE + freeEntry * 16 + 1] = fileName;
+    [INODE_TABLE + freeEntry * 16 + 2] = 0;
+    [INODE_TABLE + freeEntry * 16 + 3] = [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 3];
+    [INODE_TABLE + freeEntry * 16 + 4] = permission;
+    [INODE_TABLE + freeEntry * 16 + 8] = -1;
+    [INODE_TABLE + freeEntry * 16 + 9] = -1;
+    [INODE_TABLE + freeEntry * 16 + 10] = -1;
+    [INODE_TABLE + freeEntry * 16 + 11] = -1;
+
+
+    // Root File Entry
+    [ROOT_FILE + freeEntry * 8 + 0] = fileName;
+    [ROOT_FILE + freeEntry * 8 + 1] = 0;
+    [ROOT_FILE + freeEntry * 8 + 2] = DATA;
+    [ROOT_FILE + freeEntry * 8 + 3] = [USER_TABLE + [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 3] * 2 + 0];
+    [ROOT_FILE + freeEntry * 8 + 4] = permission;
+
+    [retValAddr] = 0;
+endif;
+
+if(systemCall == INT_DELETE) then
+    alias fileName R4;
+    fileName = [[PTBR + 2 * (userSP-4) / 512] * 512 + (userSP-4) % 512];
+
+    alias inodeLoop R5;
+    inodeLoop = 0;
+    while(inodeLoop < MAX_FILE_NUM) do
+        if([INODE_TABLE + inodeLoop * 16 + 1] == fileName) then
+            break;
+        endif;
+
+        inodeLoop = inodeLoop + 1;
+    endwhile;
+    if(inodeLoop == MAX_FILE_NUM) then
+        [retValAddr] = 0;
+        ireturn;
+    endif;
+    if([INODE_TABLE + inodeLoop * 16 + 2] != DATA) then
+        [retValAddr] = -1;
+        ireturn;
+    endif;
+    if([INODE_TABLE + inodeLoop * 16 + 4] == EXCLUSIVE && [INODE_TABLE + inodeLoop * 16 + 3] != [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 3] && [INODE_TABLE + inodeLoop * 16 + 3] != ROOT) then
+            [retValAddr] = -1;
+            ireturn;
+    endif;
+
+    multipush(R1, R2, R3, R4, R5);
+
+    R1 = ACQUIRE_INODE;
+    R2 = [SYSTEM_STATUS_TABLE + 1];
+    R3 = inodeLoop;
+    call MOD_0;
+
+    multipop(R1, R2, R3, R4, R5);
+
+    if([FILE_STATUS_TABLE + inodeLoop * 4 + 1] != -1) then
+        multipush(R1, R2, R3, R4, R5);
+
+        R1 = RELEASE_INODE;
+        R2 = [SYSTEM_STATUS_TABLE + 1];
+        R3 = inodeLoop;
+        call MOD_0;
+
+        multipop(R1, R2, R3, R4, R5);
+
+        [retValAddr] = -2;
+        ireturn;
+    endif;
+
+    alias diskLoop R6;
+    diskLoop = 8;
+    while(diskLoop < 12) do
+        alias diskBlock R7;
+        diskBlock = [INODE_TABLE + inodeLoop * 16 + diskLoop];
+        if(diskBlock != -1) then
+            [BUFFER_TABLE + (diskBlock % MAX_BUFFER) + 1] = 0; // Reset Dirty Bit
+
+            multipush(R1, R2, R3, R4, R5, R6, R7);
+
+            R1 = RELEASE_BLOCK;
+            R2 = diskBlock;
+            call MOD_2;
+
+            multipop(R1, R2, R3, R4, R5, R6, R7);
+        endif;
+        diskLoop = diskLoop + 1;
+    endwhile;
+
+    [INODE_TABLE + inodeLoop * 16 + 1] = -1; // Invalidate Inode Table Entry
+    [ROOT_FILE + inodeLoop * 8 + 0] = -1; // Invalidate Root File Entry
+
+    multipush(R1, R2, R3, R4, R5);
+
+    R1 = RELEASE_INODE;
+    R2 = [SYSTEM_STATUS_TABLE + 1];
+    R3 = inodeLoop;
+    call MOD_0;
+
+    multipop(R1, R2, R3, R4, R5);
+
+    [retValAddr] = 0;
+endif;
+
+
+
+[PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 9] = 0;
+SP = [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 13];
+
+
+ireturn;

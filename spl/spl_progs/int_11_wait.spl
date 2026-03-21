@@ -28,7 +28,9 @@ if(systemCall == INT_WAIT) then
     [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 4] = WAIT_PROCESS;
     [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 5] = PID;
 
+    multipush(R0, R1, R2, R3);
     call MOD_5;
+    multipop(R0, R1, R2, R3);
 
     [retValAddr] = 0;
 endif;
