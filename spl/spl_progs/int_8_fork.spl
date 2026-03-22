@@ -98,6 +98,11 @@ while(loop < 16) do
         [processCountAddr] = [processCountAddr] + 1;
     endif;
 
+    if([parentUserArea + loop + 0] == FILE) then
+        processCountAddr = OPEN_FILE_TABLE + [parentUserArea + loop + 1] * 4 + 1;
+        [processCountAddr] = [processCountAddr] + 1;
+    endif;
+
     loop = loop + 2;
 endwhile;
 

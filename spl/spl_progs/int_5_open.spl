@@ -1,0 +1,97 @@
+alias userSP R1;
+userSP = SP;
+
+alias currentPID R8;
+currentPID = [SYSTEM_STATUS_TABLE + 1];
+
+[PROCESS_TABLE + currentPID * 16 + 13] = SP;
+SP = [PROCESS_TABLE + currentPID * 16 + 11] * 512 - 1;
+
+alias systemCall R2;
+systemCall = [[PTBR + 2 * (userSP-5) / 512] * 512 + (userSP-5) % 512];
+
+[PROCESS_TABLE + currentPID * 16 + 9] = systemCall;
+
+alias retValAddr R3;
+retValAddr = [PTBR + 2 * (userSP-1) / 512] * 512 + (userSP-1) % 512;
+
+alias file R4;
+file = [[PTBR + 2 * (userSP-4) / 512] * 512 + (userSP-4) % 512];
+
+alias perProcessTable R5;
+perProcessTable = (([PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 11] + 1) * 512) - 16;
+
+
+if(systemCall == INT_OPEN) then
+    // Per Process Table
+    alias loop R6;
+    loop = 0;
+    while(loop < 8) do
+        if([perProcessTable + loop * 2 + 0] == -1) then
+            break;
+        endif;
+
+        loop = loop + 1;
+    endwhile;
+    if(loop == 8) then
+        [retValAddr] = -3;
+        [PROCESS_TABLE + currentPID * 16 + 9] = 0;
+        SP = [PROCESS_TABLE + currentPID * 16 + 13];
+        
+        ireturn;
+    endif;
+
+    multipush(R1, R2, R3, R4, R5, R6);
+
+    R1 = OPEN;
+    R2 = file;
+    call MOD_3;
+
+    if(R0 < 0) then
+        return;
+    endif;
+
+    multipop(R1, R2, R3, R4, R5, R6);
+
+    [perProcessTable + loop * 2 + 0] = FILE;
+    [perProcessTable + loop * 2 + 1] = R0;
+
+    [retValAddr] = loop;
+endif;
+
+if(systemCall == INT_CLOSE) then
+    if(file < 0 || file > 8) then
+        [retValAddr] = -1;
+        [PROCESS_TABLE + currentPID * 16 + 9] = 0;
+        SP = [PROCESS_TABLE + currentPID * 16 + 13];
+
+        ireturn;
+    endif;
+
+    if([perProcessTable + loop * 2 + 0] != FILE) then
+        [retValAddr] = -1;
+        [PROCESS_TABLE + currentPID * 16 + 9] = 0;
+        SP = [PROCESS_TABLE + currentPID * 16 + 13];
+
+        ireturn;
+    endif;
+
+    multipush(R1, R2, R3, R4, R5);
+
+    R1 = CLOSE;
+    R2 = [perProcessTable + file * 2 + 1];
+    call MOD_3;
+
+    multipop(R1, R2, R3, R4, R5);
+
+    [perProcessTable + file * 2 + 0] = -1;
+
+    [retValAddr] = 0;
+endif;
+
+
+[PROCESS_TABLE + currentPID * 16 + 9] = 0;
+SP = [PROCESS_TABLE + currentPID * 16 + 13];
+
+
+ireturn;
