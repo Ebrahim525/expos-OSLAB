@@ -99,6 +99,7 @@ while(loop < 16) do
     endif;
 
     if([parentUserArea + loop + 0] == FILE) then
+        alias processCountAddr R6;
         processCountAddr = OPEN_FILE_TABLE + [parentUserArea + loop + 1] * 4 + 1;
         [processCountAddr] = [processCountAddr] + 1;
     endif;

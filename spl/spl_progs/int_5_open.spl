@@ -47,11 +47,15 @@ if(systemCall == INT_OPEN) then
     R2 = file;
     call MOD_3;
 
-    if(R0 < 0) then
-        return;
-    endif;
-
     multipop(R1, R2, R3, R4, R5, R6);
+
+    if(R0 < 0) then
+        [PROCESS_TABLE + currentPID * 16 + 9] = 0;
+        SP = [PROCESS_TABLE + currentPID * 16 + 13];
+        [retValAddr] = R0;
+
+        ireturn;
+    endif;
 
     [perProcessTable + loop * 2 + 0] = FILE;
     [perProcessTable + loop * 2 + 1] = R0;
@@ -60,7 +64,7 @@ if(systemCall == INT_OPEN) then
 endif;
 
 if(systemCall == INT_CLOSE) then
-    if(file < 0 || file > 8) then
+    if(file < 0 || file >= 8) then
         [retValAddr] = -1;
         [PROCESS_TABLE + currentPID * 16 + 9] = 0;
         SP = [PROCESS_TABLE + currentPID * 16 + 13];
@@ -68,7 +72,7 @@ if(systemCall == INT_CLOSE) then
         ireturn;
     endif;
 
-    if([perProcessTable + loop * 2 + 0] != FILE) then
+    if([perProcessTable + file * 2 + 0] != FILE) then
         [retValAddr] = -1;
         [PROCESS_TABLE + currentPID * 16 + 9] = 0;
         SP = [PROCESS_TABLE + currentPID * 16 + 13];
