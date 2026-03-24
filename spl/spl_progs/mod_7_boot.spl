@@ -236,4 +236,13 @@ while(loop < MAX_BUFFER) do
     loop = loop + 1;
 endwhile;
 
+// Open File Table
+loop = 0;
+while(loop < MAX_OPENFILE_NUM) do
+    [OPEN_FILE_TABLE + loop * 4 + 0] = -1;
+    [OPEN_FILE_TABLE + loop * 4 + 1] = 0;
+
+    loop = loop + 1;
+endwhile;
+
 return;
