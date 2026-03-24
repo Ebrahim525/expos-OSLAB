@@ -71,7 +71,12 @@ if(functionNum == OPEN) then
 
         inodeEntry = inodeEntry + 1;
     endwhile;
-    if(inodeEntry == MAX_FILE_NUM || [INODE_TABLE + inodeEntry * 16] == EXEC) then
+    if(inodeEntry == MAX_FILE_NUM) then
+        R0 = -1;
+        
+        return;
+    endif;
+    if([INODE_TABLE + inodeEntry * 16] == EXEC) then
         R0 = -1;
         
         return;

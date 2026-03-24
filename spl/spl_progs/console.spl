@@ -8,7 +8,6 @@ alias reqPID R0;
 reqPID = [TERMINAL_STATUS_TABLE + 1];
 
 [PROCESS_TABLE + reqPID * 16 + 8] = P0;
-R1 = [PROCESS_TABLE + reqPID * 16 + 8];
 
 
 //Release terminal

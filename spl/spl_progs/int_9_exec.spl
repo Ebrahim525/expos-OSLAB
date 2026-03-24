@@ -21,6 +21,8 @@ while (inodeEntry < MAX_FILE_NUM) do
     if ([INODE_TABLE + inodeEntry * 16 + 1] == fileName) then
         if([INODE_TABLE + inodeEntry * 16 + 0] != EXEC) then
             [retValAddr] = -1;
+            [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 9] = 0;
+            SP = [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 13];
             ireturn;
         endif;
         break;

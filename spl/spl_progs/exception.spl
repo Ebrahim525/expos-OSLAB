@@ -1,4 +1,6 @@
-breakpoint;
+alias userSP R0;
+userSP = SP;
+
 //MODE Flag
 [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 9] = -1;
 
@@ -9,9 +11,6 @@ breakpoint;
 SP = [PROCESS_TABLE + ([SYSTEM_STATUS_TABLE + 1] * 16) + 11] * 512 - 1;
 
 backup;
-
-alias userSP R0;
-userSP = SP;
 
 multipush(EIP);
 
