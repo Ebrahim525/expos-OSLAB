@@ -18,6 +18,10 @@ loadi(9, 22);
 loadi(10, 23);
 loadi(11, 24);
 
+// INT 5 (Open, Close)
+loadi(12, 25);
+loadi(13, 26);
+
 // INT 6 (Read)
 loadi(14, 27);
 loadi(15, 28);
@@ -65,6 +69,10 @@ loadi(43, 56);
 // Module 2 (Memory)
 loadi(44, 57);
 loadi(45, 58);
+
+// Module 3 (File)
+loadi(46, 59);
+loadi(47, 60);
 
 // Module 4 (Terminal Write)
 loadi(48, 61);

@@ -1,7 +1,65 @@
 alias functionNum R1;
-alias file R2;
+
+if(functionNum == BUFFERED_READ) then
+    alias diskBlock R2;
+    alias offset R3;
+    alias word R4;
+    alias buffer R5;
+
+    buffer = diskBlock % MAX_BUFFER;
+
+    multipush(R1, R2, R3, R4, R5);
+
+    R1 = ACQUIRE_BUFFER;
+    R2 = [SYSTEM_STATUS_TABLE + 1];
+    R3 = buffer;
+    call MOD_0;
+
+    multipop(R1, R2, R3, R4, R5);
+
+    if([BUFFER_TABLE + buffer * 4 + 0] != diskBlock) then
+        if([BUFFER_TABLE + buffer * 4 + 1] == 1) then
+            multipush(R1, R2, R3, R4, R5);
+
+            R1 = DISK_STORE;
+            R2 = [SYSTEM_STATUS_TABLE + 1];
+            R3 = [BUFFER_TABLE + buffer * 4 + 0];
+            call MOD_4;
+
+            multipop(R1, R2, R3, R4, R5);
+
+            [BUFFER_TABLE + buffer * 4 + 1] = 0;
+        endif;
+
+        multipush(R1, R2, R3, R4, R5);
+
+        R1 = DISK_LOAD;
+        R2 = [SYSTEM_STATUS_TABLE + 1];
+        R3 = BUFFER / 512 + buffer;
+        R4 = diskBlock;
+
+        multipop(R1, R2, R3, R4, R5);
+
+        [BUFFER_TABLE + buffer * 4 + 0] = diskBlock;
+    endif;
+
+    [word] = [BUFFER + buffer * 512 + offset];
+
+    multipush(R1, R2, R3, R4, R5);
+
+    R1 = RELEASE_BUFFER;
+    R2 = [SYSTEM_STATUS_TABLE + 1];
+    R3 = buffer;
+    call MOD_0;
+
+    multipop(R1, R2, R3, R4, R5);
+
+    R0 = 0;
+    return;
+endif;
 
 if(functionNum == OPEN) then
+    alias file R2;
     alias inodeEntry R3;
     inodeEntry = 0;
     while(inodeEntry < MAX_FILE_NUM) do
@@ -83,6 +141,7 @@ if(functionNum == OPEN) then
 endif;
 
 if(functionNum == CLOSE) then
+    alias file R2;
     [OPEN_FILE_TABLE + file * 4 + 1] = [OPEN_FILE_TABLE + file * 4 + 1] - 1;
 
     if([OPEN_FILE_TABLE + file * 4 + 1] == 0) then
