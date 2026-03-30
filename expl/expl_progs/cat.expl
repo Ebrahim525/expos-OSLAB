@@ -1,25 +1,26 @@
-int main() {
+int main()
+{
     decl
-        int temp, fd;
-        string w1, fileName, word;
+        int fd, temp;
+        string fileName, word;
     enddecl
     begin
-        w1 = "Enter File";
-        temp = exposcall("Write", -2, w1);
         temp = exposcall("Read", -1, fileName);
 
         fd = exposcall("Open", fileName);
-        if(fd != 0) then
-            temp = exposcall("Write", -2, fd);
+        if(temp < 0) then
+            write("Error opening file");
         else
             while(1 == 1) do
                 temp = exposcall("Read", fd, word);
-                if(temp == -2) then
+                if(temp < 0) then
                     break;
                 endif;
 
                 temp = exposcall("Write", -2, word);
             endwhile;
+
+            temp = exposcall("Close", fd);
         endif;
 
         return 0;

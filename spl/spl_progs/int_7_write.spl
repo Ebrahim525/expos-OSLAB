@@ -1,51 +1,158 @@
-//MODE Flag
-[PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 9] = 5;
-
-//Save User SP
-alias userSP R0;
+alias userSP R1;
 userSP = SP;
+alias currentPID R2;
+currentPID = [SYSTEM_STATUS_TABLE + 1];
 
-//Saving SP in Process Table and setting SP to Kernel Stack
-[PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 13] = SP;
-SP = [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 11] * 512 - 1;
+[PROCESS_TABLE + currentPID * 16 + 13] = userSP;
+SP = [PROCESS_TABLE + currentPID * 16 + 11] * 512 - 1;
 
-alias physicalPageNumber R1;
-alias offset R2;
-alias fileDescPhysicalAddr R3;
-physicalPageNumber = [PTBR + 2 * ((userSP - 4) / 512)];
+[PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 9] = 7;
 
-offset = (userSP - 4) % 512;
-fileDescPhysicalAddr = physicalPageNumber * 512 + offset;
+alias retValAddr R3;
+retValAddr = [PTBR + 2 * ((userSP-1) / 512)] * 512 + (userSP-1) % 512;
 
 alias fileDescriptor R4;
-fileDescriptor = [fileDescPhysicalAddr];
+fileDescriptor = [[PTBR + 2 * ((userSP-4) / 512)] * 512 + (userSP-4) % 512];
 
-if (fileDescriptor != -2) then
-	alias physicalAddrRetVal R5;
-	physicalAddrRetVal = ([PTBR + 2 * (userSP - 1) / 512] * 512) + ((userSP - 1) % 512);
-	[physicalAddrRetVal] = -1;
-else
-	alias word R5;
-	word = [[PTBR + 2 * ((userSP - 3) / 512)] * 512 + ((userSP - 3) % 512)];
-	
-	multipush(R0, R1, R2, R3, R4, R5);
-	
-	alias functionNum R1;
-	alias currentPID R2;
-	functionNum = TERMINAL_WRITE; // 
-	currentPID = [SYSTEM_STATUS_TABLE + 1];
+alias word R5;
+word = [[PTBR + 2 * ((userSP - 3) / 512)] * 512 + ((userSP - 3) % 512)];
+
+alias perProcessTable R6;
+perProcessTable = (([PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 11] + 1) * 512) - 16;
+
+
+
+if(fileDescriptor == -2) then
+	multipush(R1, R2, R3, R4, R5, R6);
+
+	R1 = TERMINAL_WRITE;
+	R2 = currentPID;
 	R3 = word;
-
 	call MOD_4;
 
-	multipop(R0, R1, R2, R3, R4, R5);
+	multipop(R1, R2, R3, R4, R5, R6);
+else
+	if(fileDescriptor < 0 || fileDescriptor >= 8 || [perProcessTable + fileDescriptor * 2 + 0] != FILE) then
+        [retValAddr] = -1;
+        SP = userSP;
+        [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 9] = 0;
 
-	alias physicalAddrRetVal R6;
-	physicalAddrRetVal = ([PTBR + 2 * (userSP - 1) / 512] * 512) + ((userSP - 1) % 512);
-	[physicalAddrRetVal] = 0;
+        ireturn;
+    endif;
+
+	alias openTableEntry R7;
+    openTableEntry = OPEN_FILE_TABLE + [perProcessTable + fileDescriptor * 2 + 1] * 4;
+	alias inodeTableEntry R8;
+	inodeTableEntry = [openTableEntry + 0];
+
+	if([INODE_TABLE + inodeTableEntry * 16 + 4] == EXCLUSIVE && [PROCESS_TABLE + currentPID* 16 + 3] != ROOT && [PROCESS_TABLE + currentPID* 16 + 3] != [INODE_TABLE + inodeTableEntry * 16 + 3]) then
+		[retValAddr] = -3;
+		SP = userSP;
+		[PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 9] = 0;
+
+		ireturn;
+	endif;
+
+	multipush(R1, R2, R3, R4, R5, R6, R7, R8);
+
+    R1 = ACQUIRE_INODE;
+    R2 = [SYSTEM_STATUS_TABLE + 1];
+    R3 = [openTableEntry + 0];
+    call MOD_0;
+
+    multipop(R1, R2, R3, R4, R5, R6, R7, R8);
+    if(R0 != 0) then
+        [retValAddr] = -1;
+        SP = userSP;
+        [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 9] = 0;
+
+        ireturn;
+    endif;
+
+	alias Lseek R9;
+    Lseek = [openTableEntry + 2];
+	if(Lseek == MAX_FILE_SIZE) then
+		multipush(R1, R2, R3, R4, R5, R6, R7, R8, R9);
+
+		R1 = RELEASE_INODE;
+		R2 = [SYSTEM_STATUS_TABLE + 1];
+		R3 = inodeTableEntry;
+		call MOD_0;
+
+		multipop(R1, R2, R3, R4, R5, R6, R7, R8, R9);
+
+		[retValAddr] = -2;
+		SP = userSP;
+		[PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 9] = 0;
+
+		ireturn;
+	endif;
+
+	if(Lseek % 512 == 0) then
+		multipush(R1, R2, R3, R4, R5, R6, R7, R8, R9);
+
+		R1 = GET_FREE_BLOCK;
+		R2 = currentPID;
+		call MOD_0;
+
+		multipop(R1, R2, R3, R4, R5, R6, R7, R8, R9);
+
+		if(R0 == -1) then
+			multipush(R1, R2, R3, R4, R5, R6, R7, R8, R9);
+
+			R1 = RELEASE_INODE;
+			R2 = currentPID;
+			R3 = inodeTableEntry;
+			call MOD_0;
+
+			multipop(R1, R2, R3, R4, R5, R6, R7, R8, R9);
+
+			[retValAddr] = -2;
+			SP = userSP;
+			[PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 9] = 0;
+
+			ireturn;
+		endif;
+
+		[INODE_TABLE + inodeTableEntry * 16 + 8 + Lseek / 512] = R0;
+	endif;
+
+	alias diskBlock R10;
+	alias offset R11;
+	diskBlock = [INODE_TABLE + inodeTableEntry * 16 + 8 + Lseek / 512];
+	offset = Lseek % 512;
+
+	multipush(R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11);
+
+	R1 = BUFFERED_WRITE;
+	R2 = diskBlock;
+	R3 = offset;
+	R4 = word;
+	call MOD_3;
+
+	multipop(R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11);
+
+	if(Lseek == [INODE_TABLE + inodeTableEntry * 16 + 2]) then
+		[INODE_TABLE + inodeTableEntry * 16 + 2] = Lseek + 1;
+		[ROOT_FILE + inodeTableEntry * 8 + 1] = Lseek + 1;
+	endif;
+
+	[openTableEntry + 2] = Lseek + 1;
+
+	multipush(R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11);
+
+    R1 = RELEASE_INODE;
+    R2 = [SYSTEM_STATUS_TABLE + 1];
+    R3 = [openTableEntry + 0];
+    call MOD_0;
+
+    multipop(R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11);
 endif;
 
-//Changing to user mode and setting MODE Flag
+
+
+[retValAddr] = 0;
+
 SP = userSP;
 [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 9] = 0;
 

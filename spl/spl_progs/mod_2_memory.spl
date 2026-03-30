@@ -60,6 +60,22 @@ if(functionNum == RELEASE_PAGE) then
     return;
 endif;
 
+if(functionNum == GET_FREE_BLOCK) then
+    alias diskLoop R0;
+    diskLoop = DISK_FREE_AREA;
+    while(diskLoop < DISK_SWAP_AREA) do
+        if([DISK_FREE_LIST + diskLoop] == 0) then
+            [DISK_FREE_LIST + diskLoop] = 1;
+            return;
+        endif;
+
+        diskLoop = diskLoop + 1;
+    endwhile;
+
+    R0 = -1;
+    return;
+endif;
+
 if(functionNum == RELEASE_BLOCK) then
     alias blockNumber R2;
 
