@@ -15,14 +15,14 @@ int main() {
             loop = loop + 1;
         endwhile;
 
-        loop = 1613;
+        loop = 0;
         temp = exposcall("Seek", fd, -1);
-        while(loop >= 0) do
+        while(loop <= 1613) do
             temp = exposcall("Read", fd, word);
             write(word);
 
             temp = exposcall("Seek", fd, -2);
-            loop = loop - 1;
+            loop = loop + 1;
         endwhile;
 
         temp = exposcall("Close", fd);
