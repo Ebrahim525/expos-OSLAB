@@ -9,7 +9,7 @@ begin
     while(a == 1) do
         temp = exposcall("Write",-2,"---Enter---");
         temp = exposcall("Read",-1, input);
-        if(input != "shutdown") then
+        if(input != "shutdown" AND input != "exit") then
             pid = exposcall("Fork");
             if(pid < 0) then
                 temp = exposcall("Write",-2, "Fork Failure");

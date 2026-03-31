@@ -1,0 +1,23 @@
+int main() {
+    decl
+        int temp, fd, loop;
+        string fileName, permission;
+    enddecl
+    begin
+        fileName = "d.dat";
+        permission = "0";
+
+        temp = exposcall("Create", fileName, permission);
+        fd = exposcall("Open", fileName);
+
+        loop = 0;
+        while(loop < 10) do 
+            temp = exposcall("Write", fd, loop + 1);
+            loop = loop + 1;
+        endwhile;
+
+        fd = exposcall("Close", fd);
+
+        return 0;
+    end
+}

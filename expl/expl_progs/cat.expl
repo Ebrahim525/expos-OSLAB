@@ -8,7 +8,7 @@ int main()
         temp = exposcall("Read", -1, fileName);
 
         fd = exposcall("Open", fileName);
-        if(temp < 0) then
+        if(fd < 0) then
             write("Error opening file");
         else
             while(1 == 1) do

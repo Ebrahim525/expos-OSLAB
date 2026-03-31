@@ -1,7 +1,7 @@
 alias userSP R1;
 userSP = SP;
 
-alias currentPID R8;
+alias currentPID R11;
 currentPID = [SYSTEM_STATUS_TABLE + 1];
 
 [PROCESS_TABLE + currentPID * 16 + 13] = SP;
@@ -125,11 +125,11 @@ if(systemCall == INT_SEEK) then
 
         ireturn;
     endif;
-
+    
     alias Lseek R9;
     Lseek = [openTableEntry + 2];
     alias fileSize R10;
-    if(file == INODE_ROOT) then
+    if(inodeTableEntry == INODE_ROOT) then
         fileSize = 480;
     else
         fileSize = [INODE_TABLE + inodeTableEntry * 16 + 2];
@@ -151,7 +151,7 @@ if(systemCall == INT_SEEK) then
 
         ireturn;
     endif;
-
+    
     if(offset == 0) then
         [openTableEntry + 2] = 0;
     else
@@ -170,7 +170,7 @@ if(systemCall == INT_SEEK) then
 		call MOD_0;
 
 	multipop(R1, R2, R3, R4, R5, R6, R7, R8, R9, R10);
-
+    
     [retValAddr] = 0;
 endif;
 

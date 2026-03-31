@@ -12,7 +12,9 @@ int main()
         else
             seek = 0;
             while(1 == 1) do
+                temp = exposcall("Seek", fd, 0);
                 temp = exposcall("Seek", fd, seek);
+
                 if(temp < 0) then
                     write("Seek error");
                     break;
@@ -23,7 +25,9 @@ int main()
                     break;
                 endif;
 
-                temp = exposcall("Write", -2, word);
+                if(word != "-1") then
+                    write(word);
+                endif;
 
                 seek = seek + 8;
             endwhile;
