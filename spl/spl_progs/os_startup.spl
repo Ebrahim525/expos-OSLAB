@@ -6,9 +6,8 @@ loadi(55, 68);
 
 // Loading Idle Code
 loadi(69, 11);
-loadi(70, 12);
 
-SP = 82 * 512 - 1;
+SP = 76 * 512 - 1;
 
 call BOOT_MODULE;
 
@@ -31,7 +30,7 @@ PTBR = PAGE_TABLE_BASE;
 // Code
 [PTBR+8] = 69;
 [PTBR+9] = "0100";
-[PTBR+10] = 70;
+[PTBR+10] = -1;
 [PTBR+11] = "0100";
 [PTBR+12] = -1;
 [PTBR+13] = "0000";
@@ -39,7 +38,7 @@ PTBR = PAGE_TABLE_BASE;
 [PTBR+15] = "0000";
 
 // Stack
-[PTBR+16] = 81;
+[PTBR+16] = 70;
 [PTBR+17] = "0110";
 [PTBR+18] = -1;
 [PTBR+19] = "0000";
@@ -48,7 +47,7 @@ PTBR = PAGE_TABLE_BASE;
 [PROCESS_TABLE + 0] = 0; // TICK
 [PROCESS_TABLE + 1] = 0; // PID
 [PROCESS_TABLE + 4] = RUNNING; // STATE
-[PROCESS_TABLE + 11] = 82; // User Area Page
+[PROCESS_TABLE + 11] = 76; // User Area Page
 [PROCESS_TABLE + 12] = 0; // KPTR
 [PROCESS_TABLE + 13] = 8*512; // UPTR
 [PROCESS_TABLE + 14] = PAGE_TABLE_BASE; // PTBR
@@ -63,13 +62,12 @@ while(loop < 10) do
 endwhile;
 
 [DISK_MAP_TABLE + 4] = 11;
-[DISK_MAP_TABLE + 5] = 12;
 
 // Setting PID Number in System Status Table
 [SYSTEM_STATUS_TABLE + 1] = 0;
 
 //SETTING ENTRY POINT IN USER STACK
-[81 * 512] = [69 * 512 + 1];
+[70 * 512] = [69 * 512 + 1];
 
 // Setting SP to point to the user stack of Idle Process
 SP = 8 * 512;

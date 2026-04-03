@@ -1,34 +1,24 @@
 int main()
 {
-decl
-    int temp, pid, a;
-    string input;
-enddecl
-begin
-    a=1;
-    while(a == 1) do
-        temp = exposcall("Write",-2,"---Enter---");
-        temp = exposcall("Read",-1, input);
-        if(input != "shutdown" AND input != "exit") then
-            pid = exposcall("Fork");
-            if(pid < 0) then
-                temp = exposcall("Write",-2, "Fork Failure");
-                continue;
-            endif;
-            if(pid != 0) then
-                temp = exposcall("Wait",pid);
+    decl
+        int temp, temp2;
+        string userName, password;
+    enddecl
+    begin
+        while(1 == 1) do
+            read(userName);
+            read(password);
+
+            temp = exposcall("Login", userName, password);
+            if(temp == -1) then
+                temp2 = exposcall("Write", -2, "Invalid Credentials");
             else
-                temp = exposcall("Exec",input);
-                if(temp != 0) then
-                    temp = exposcall("Write",-2, "BAD COMMAND");
-                    break;
+                if(temp == -2) then
+                    temp2 = exposcall("Write", -2, "Permission Denied");
                 endif;
             endif;
-        else
-            temp = exposcall("Shutdown");
-            break;
-        endif;
-    endwhile;
-    return 0;
-end
+        endwhile;
+
+        return 0;
+    end
 }
