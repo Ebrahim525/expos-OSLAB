@@ -178,7 +178,7 @@ endwhile;
 
 
 // Shell
-PTBR = PTBR + 40;
+PTBR = PAGE_TABLE_BASE + 40;
 loadi(67, 9);
 loadi(68, 10);
 // SHARED Library

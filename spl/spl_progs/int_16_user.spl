@@ -14,6 +14,13 @@ retValAddr = [PTBR + 2 * ((userSP-1) / 512)] * 512 + (userSP-1) % 512;
 alias systemCall R4;
 systemCall = [[PTBR + 2 * (userSP-5) / 512] * 512 + (userSP-5) % 512];
 
+alias userName R5;
+userName = [[PTBR + 2 * ((userSP-4) / 512)] * 512 + (userSP-4) % 512];
+
+alias password R6;
+password = [[PTBR + 2 * ((userSP - 3) / 512)] * 512 + ((userSP - 3) % 512)];
+
+
 [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 9] = systemCall;
 
 
@@ -25,12 +32,6 @@ if(systemCall == INT_NEWUSR) then
 
         ireturn;
     endif;
-
-    alias userName R5;
-    userName = [[PTBR + 2 * ((userSP-4) / 512)] * 512 + (userSP-4) % 512];
-
-    alias password R6;
-    password = [[PTBR + 2 * ((userSP - 3) / 512)] * 512 + ((userSP - 3) % 512)];
 
     alias userEntry R7;
     userEntry = 0;
@@ -76,9 +77,6 @@ if(systemCall == INT_REMUSR) then
         ireturn;
     endif;
 
-    alias userName R5;
-    userName = [[PTBR + 2 * ((userSP-4) / 512)] * 512 + (userSP-4) % 512];
-
     alias userEntry R6;
     userEntry = 0;
     while(userEntry < MAX_USER_NUM) do
@@ -123,12 +121,6 @@ if(systemCall == INT_SETPWD) then
         ireturn;
     endif;
 
-    alias userName R5;
-    userName = [[PTBR + 2 * ((userSP-4) / 512)] * 512 + (userSP-4) % 512];
-
-    alias password R6;
-    password = [[PTBR + 2 * ((userSP - 3) / 512)] * 512 + ((userSP - 3) % 512)];
-
     alias userEntry R7;
     userEntry = 0;
     while(userEntry < MAX_USER_NUM) do
@@ -160,9 +152,6 @@ if(systemCall == INT_SETPWD) then
 endif;
 
 if(systemCall == INT_GETUID) then
-    alias userName R5;
-    userName = [[PTBR + 2 * ((userSP-4) / 512)] * 512 + (userSP-4) % 512];
-
     alias userEntry R6;
     userEntry = 0;
     while(userEntry < MAX_USER_NUM) do
@@ -182,7 +171,6 @@ endif;
 
 if(systemCall == INT_GETUNAME) then
     alias userID R5;
-    userID = [[PTBR + 2 * ((userSP-4) / 512)] * 512 + (userSP-4) % 512];
 
     if(userID < 0 || userID >= MAX_USER_NUM) then
         [retValAddr] = -1;

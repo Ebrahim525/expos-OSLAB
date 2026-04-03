@@ -31,11 +31,12 @@ multipop(R1, R2, R3);
 [PROCESS_TABLE + 2 * 16 + 4] = TERMINATED;
 
 alias newIP R4;
-newIP = [PTBR + 40 + 2 * 8] * 512 + 2;
+newIP = [PAGE_TABLE_BASE + 40 + 2 * 4] * 512 + 1;
 
-userSP = userSP + 1;
-[userSp] = newIP;
-[PROCESS_TABLE + currentPID * 16 + 13] = userSP;
+alias newSP R5;
+newSP = [PAGE_TABLE_BASE + 40 + 2 * 8] * 512;
+[newSP] = newIP;
+[PROCESS_TABLE + currentPID * 16 + 13] = 8 * 512;
 
 
 [PROCESS_TABLE + 1 * 16 + 4] = READY;
