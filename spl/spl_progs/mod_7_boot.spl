@@ -178,6 +178,7 @@ endwhile;
 
 
 // Shell
+PTBR = PTBR + 40;
 loadi(67, 9);
 loadi(68, 10);
 // SHARED Library
