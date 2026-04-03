@@ -234,7 +234,7 @@ while(loop < 10) do
 endwhile;
 // Init
 [DISK_MAP_TABLE + 10 + 4] = 7;
-// Login
+// Shell
 [DISK_MAP_TABLE + 20 + 4] = 9;
 [DISK_MAP_TABLE + 20 + 5] = 10;
 
