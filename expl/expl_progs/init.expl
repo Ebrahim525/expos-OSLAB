@@ -2,11 +2,15 @@ int main()
 {
     decl
         int temp, temp2;
-        string userName, password;
+        string userName, password, w;
     enddecl
     begin
         while(1 == 1) do
+            w = "Username";
+            write(w);
             read(userName);
+            w = "Password";
+            write(w);
             read(password);
 
             temp = exposcall("Login", userName, password);

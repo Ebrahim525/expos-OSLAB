@@ -61,7 +61,7 @@ if(systemCall == INT_CREATE) then
     [inodeEntry + 0] = DATA;
     [inodeEntry + 1] = fileName;
     [inodeEntry + 2] = 0;
-    [inodeEntry + 3] = [PROCESS_TABLE + currentPID * 16 + 3];
+    [inodeEntry + 3] = [SYSTEM_STATUS_TABLE + 0];
     [inodeEntry + 4] = permission;
     [inodeEntry + 8] = -1;
     [inodeEntry + 9] = -1;
@@ -75,7 +75,7 @@ if(systemCall == INT_CREATE) then
     [rootEntry + 0] = fileName;
     [rootEntry + 1] = 0;
     [rootEntry + 2] = DATA;
-    [rootEntry + 3] = [USER_TABLE + [PROCESS_TABLE + currentPID * 16 + 3] * 2 + 0];
+    [rootEntry + 3] = [USER_TABLE + [SYSTEM_STATUS_TABLE + 0] * 2 + 0];
     [rootEntry + 4] = permission;
 
     [retValAddr] = 0;

@@ -1,41 +1,39 @@
 int main()
 {
     decl
-        int fd, temp, seek, seek2;
-        string word, userName;
+        int fd1, fd2, temp, loop;
+        string fileName, user, userName;
     enddecl
     begin
         read(userName);
 
-        fd = exposcall("Open", "root");
+        fd1 = exposcall("Open", "root");
+        fd2 = exposcall("Open", "root");
 
-        if(fd < 0) then
+        if(fd1 < 0 OR fd2 < 0) then
             write("Error opening root directory");
         else
-            seek = 3;
+            temp = exposcall("Seek", fd1, 3);
+            temp = exposcall("Seek", fd2, 0);
             while(1 == 1) do
-                temp = exposcall("Seek", fd, 0);
-                temp = exposcall("Seek", fd, seek);
-
-                if(temp < 0) then
-                    write("Seek error");
+                temp = exposcall("Read", fd1, user);
+                if(temp != 0) then
                     break;
                 endif;
-
-                temp = exposcall("Read", fd, word);
-                if(temp < 0) then
-                    break;
+                temp = exposcall("Seek", fd1, -1);
+                
+                if(userName == user) then
+                    temp = exposcall("Read", fd2, fileName);
+                    temp = exposcall("Seek", fd2, -1);
+                    temp = exposcall("Delete", fileName);
                 endif;
 
-                if(word == userName) then
-                    temp = exposcall("Seek", fd, 0);
-                    temp = exposcall("Write", fd, "-1");
-                endif;
-
-                seek = seek + 8;
+                temp = exposcall("Seek", fd1, 8);
+                temp = exposcall("Seek", fd2, 8);
             endwhile;
 
-            temp = exposcall("Close", fd);
+            temp = exposcall("Close", fd1);
+            temp = exposcall("Close", fd2);
         endif;
 
         return 0;

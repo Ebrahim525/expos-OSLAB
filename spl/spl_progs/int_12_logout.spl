@@ -31,7 +31,7 @@ multipop(R1, R2, R3);
 [PROCESS_TABLE + 2 * 16 + 4] = TERMINATED;
 
 alias newIP R4;
-newIP = [PAGE_TABLE_BASE + 40 + 2 * 4] * 512 + 1;
+newIP = [[PAGE_TABLE_BASE + 40 + 2 * 4] * 512 + 1];
 
 alias newSP R5;
 newSP = [PAGE_TABLE_BASE + 40 + 2 * 8] * 512;

@@ -1,0 +1,23 @@
+int main() {
+    decl
+        int temp;
+        string fileName, permission, w1;
+    enddecl
+    begin
+        w1 = "FileName";
+        write(w1);
+        read(fileName);
+        w1 = "Permission";
+        write(w1);
+        read(permission);
+
+        temp = exposcall("Create", fileName, permission);
+        if (temp != 0) then
+            write("Error creating file");
+        else
+            write("File created successfully.");
+        endif;
+
+        return 0;
+    end
+}

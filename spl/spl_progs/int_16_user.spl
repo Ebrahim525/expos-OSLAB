@@ -66,10 +66,12 @@ if(systemCall == INT_NEWUSR) then
 
     [USER_TABLE + userEntry * 2 + 0] = userName;
     [USER_TABLE + userEntry * 2 + 1] = password;
+
+    [retValAddr] = 0;
 endif;
 
 if(systemCall == INT_REMUSR) then
-    if([SYSTEM_STATUS_TABLE + 0] != ROOT || currentPID != SHELL_PROCESS || userName == ROOT || userName == KERNEL) then
+    if([SYSTEM_STATUS_TABLE + 0] != ROOT || currentPID != SHELL_PROCESS || userName == "root" || userName == "kernel") then
         [retValAddr] = -2;
         SP = userSP;
         [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 9] = 0;
@@ -110,6 +112,8 @@ if(systemCall == INT_REMUSR) then
 
     [USER_TABLE + userEntry * 2 + 0] = -1;
     [USER_TABLE + userEntry * 2 + 1] = -1;
+
+    [retValAddr] = 0;
 endif;
 
 if(systemCall == INT_SETPWD) then
@@ -149,6 +153,8 @@ if(systemCall == INT_SETPWD) then
     encrypt password;
 
     [USER_TABLE + userEntry * 2 + 1] = password;
+
+    [retValAddr] = 0;
 endif;
 
 if(systemCall == INT_GETUID) then
@@ -191,8 +197,6 @@ if(systemCall == INT_GETUNAME) then
     [retValAddr] = [USER_TABLE + userID * 2 + 0];
 endif;
 
-
-[retValAddr] = 0;
 SP = userSP;
 [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 9] = 0;
 
