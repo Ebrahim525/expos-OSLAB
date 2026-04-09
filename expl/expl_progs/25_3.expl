@@ -19,6 +19,7 @@ begin
 
         iter=1;
         while(iter <= 100) do
+            breakpoint;
             a=exposcall("Read",fd, data);
             if(a!=-2) then
                 breakpoint;
