@@ -9,10 +9,10 @@ SP = [PROCESS_TABLE + currentPID * 16 + 11] * 512 - 1;
 [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 9] = 7;
 
 alias retValAddr R2;
-retValAddr = [PTBR + 2 * (userSP-1) / 512] * 512 + (userSP-1) % 512;
+retValAddr = [PTBR + 2 * ((userSP-1) / 512)] * 512 + (userSP-1) % 512;
 
 alias fileDescriptor R3;
-fileDescriptor = [[PTBR + 2 * (userSP-4) / 512] * 512 + (userSP-4) % 512];
+fileDescriptor = [[PTBR + 2 * ((userSP-4) / 512)] * 512 + (userSP-4) % 512];
 
 alias word R4;
 word = [[PTBR + 2 * ((userSP - 3) / 512)] * 512 + ((userSP - 3) % 512)];
@@ -29,6 +29,7 @@ if(fileDescriptor == -1) then
     call MOD_4;
 
     multipop(R1, R2, R3, R4, R5);
+    [retValAddr] = 0;
 else
     if(fileDescriptor < 0 || fileDescriptor >= 8 || [perProcessTable + fileDescriptor * 2 + 0] != FILE) then
         [retValAddr] = -1;
@@ -61,14 +62,14 @@ else
     Lseek = [openTableEntry + 2];
     if([openTableEntry + 0] == INODE_ROOT) then
         if(Lseek == 480) then
-            multipush(R2, R6);
+            multipush(R1, R2, R6);
 
             R1 = RELEASE_INODE;
             R2 = [SYSTEM_STATUS_TABLE + 1];
             R3 = [openTableEntry + 0];
             call MOD_0;
 
-            multipop(R2, R6);
+            multipop(R1, R2, R6);
 
             [retValAddr] = -2;
             SP = [PROCESS_TABLE + currentPID * 16 + 13];
@@ -76,19 +77,18 @@ else
 
             ireturn;
         endif;
-
         [([PTBR + 2 * (word / 512)] * 512) + (word % 512)] = [ROOT_FILE + Lseek];
         [openTableEntry + 2] = Lseek + 1;
     else
         if(Lseek == [INODE_TABLE + [openTableEntry + 0] * 16 + 2]) then
-            multipush(R2, R6);
+            multipush(R1, R2, R6);
 
             R1 = RELEASE_INODE;
             R2 = [SYSTEM_STATUS_TABLE + 1];
             R3 = [openTableEntry + 0];
             call MOD_0;
 
-            multipop(R2, R6);
+            multipop(R1, R2, R6);
 
             [retValAddr] = -2;
             SP = userSP;
@@ -112,23 +112,22 @@ else
 
         multipop(R1, R2, R3, R4, R5, R6, R7, R8, R9);
 
-
         [openTableEntry + 2] = Lseek + 1;
     endif;
 
-    multipush(R2, R6);
+    multipush(R1, R2, R6);
 
     R1 = RELEASE_INODE;
     R2 = [SYSTEM_STATUS_TABLE + 1];
     R3 = [openTableEntry + 0];
     call MOD_0;
 
-    multipop(R2, R6);
+    multipop(R1, R2, R6);
 endif;
 
 [retValAddr] = 0;
 
-SP = [PROCESS_TABLE + currentPID * 16 + 13];
+SP = userSP;
 [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 9] = 0;
 
 ireturn;
