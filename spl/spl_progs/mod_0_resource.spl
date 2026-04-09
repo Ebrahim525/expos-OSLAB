@@ -14,7 +14,7 @@ if(functionNum == ACQUIRE_DISK) then
 
         multipop(R1, R2);
     endwhile;
-
+    [ROOT_FILE + 6] = [ROOT_FILE + 6] + 1;
     [DISK_STATUS_TABLE + 0] = 1;
     [DISK_STATUS_TABLE + 4] = currentPID;
 

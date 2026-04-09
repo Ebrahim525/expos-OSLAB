@@ -50,5 +50,5 @@ endif;
 
 // Restoring BP
 multipop(BP);
-
+[ROOT_FILE + 7] = [ROOT_FILE + 7] + 1;
 return;

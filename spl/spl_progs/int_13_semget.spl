@@ -29,7 +29,8 @@ if(systemCall == INT_SEMGET) then
     endwhile;
     if(loop == 8) then
         [retValAddr] = -1;
-        
+        [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 9] = 0;
+        SP = userSP;
         ireturn;
     endif;
 
@@ -45,7 +46,8 @@ if(systemCall == INT_SEMGET) then
 
     if(R0 == -1) then
         [retValAddr] = -2;
-
+        [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 9] = 0;
+        SP = userSP;
         ireturn;
     endif;
 
@@ -61,12 +63,15 @@ if(systemCall == INT_SEMRELEASE) then
 
     if(semID < 0 || semID >= 8) then
         [retValAddr] = -1;
-
+        [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 9] = 0;
+        SP = userSP;
         ireturn;
     endif;
 
     if([perProcessTable + semID * 2 + 0] != SEMAPHORE) then
         [retValAddr] = -1;
+        [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 9] = 0;
+        SP = userSP;
 
         ireturn;
     endif;
@@ -88,7 +93,7 @@ endif;
 
 
 [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 9] = 0;
-SP = [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 13];
+SP = userSP;
 
 
 ireturn;
