@@ -22,18 +22,15 @@ if(systemCall == INT_SEMLOCK) then
 
     if(semID < 0 || semID >= 8) then
         [retValAddr] = -1;
-
         [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 9] = 0;
-        SP = [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 13];
-
+        SP = userSP;
         ireturn;
     endif;
 
     if([perProcessTable + semID * 2 + 0] != SEMAPHORE) then
         [retValAddr] = -1;
-
         [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 9] = 0;
-        SP = [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 13];
+        SP = userSP;
 
         ireturn;
     endif;
@@ -64,18 +61,15 @@ if(systemCall == INT_SEMUNLOCK) then
 
     if(semID < 0 || semID >= 8) then
         [retValAddr] = -1;
-
         [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 9] = 0;
-        SP = [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 13];
-
+        SP = userSP;
         ireturn;
     endif;
 
     if([perProcessTable + semID * 2 + 0] != SEMAPHORE) then
         [retValAddr] = -1;
-
         [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 9] = 0;
-        SP = [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 13];
+        SP = userSP;
 
         ireturn;
     endif;
@@ -86,9 +80,8 @@ if(systemCall == INT_SEMUNLOCK) then
     if([SEMAPHORE_TABLE + semDesc * 4 + 0] != -1) then
         if([SEMAPHORE_TABLE + semDesc * 4 + 0] != [SYSTEM_STATUS_TABLE + 1]) then
             [retValAddr] = -2;
-
             [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 9] = 0;
-            SP = [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 13];
+            SP = userSP;
 
             ireturn;
         endif;
