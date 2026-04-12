@@ -1,6 +1,3 @@
-alias userSP R0;
-userSP = SP;
-
 //MODE Flag
 [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 9] = -1;
 
@@ -12,6 +9,9 @@ SP = [PROCESS_TABLE + ([SYSTEM_STATUS_TABLE + 1] * 16) + 11] * 512 - 1;
 
 backup;
 
+alias userSP R0;
+userSP = SP;
+
 multipush(EIP);
 
 if(EC != 0 || userSP == PTLR * 512 - 1) then
@@ -20,6 +20,7 @@ if(EC != 0 || userSP == PTLR * 512 - 1) then
     endif;
 
     if(EC == 2) then
+        breakpoint;
         print("Illegal Memory Access");
     endif;
 

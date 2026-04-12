@@ -11,18 +11,13 @@ begin
     temp=exposcall("Read",-1,filename);
     temp=exposcall("Read",-1,permission);
     temp=exposcall("Create",filename, permission);
-    breakpoint;
-    data = 202;
     pidone = exposcall("Fork");
     if (pidone != 0 ) then
         fd=exposcall("Open",filename);
-
         iter=1;
         while(iter <= 100) do
-            breakpoint;
             a=exposcall("Read",fd, data);
             if(a!=-2) then
-                breakpoint;
                 temp=exposcall("Write",-2, data);
                 iter=iter+1;
             endif;
@@ -30,12 +25,10 @@ begin
     else
         semid = exposcall("Semget");
         fd=exposcall("Open",filename);
-
         pidtwo =  exposcall("Fork");
         if(pidtwo == 0) then
             iter = 1;
             while(iter <= 100) do
-                breakpoint;
                 temp = exposcall("SemLock", semid);
                 temp=exposcall("Write",fd, iter);
                 temp = exposcall("SemUnLock", semid);
@@ -44,7 +37,6 @@ begin
         else
             iter = 2;
             while(iter <= 100) do
-                breakpoint;
                 temp = exposcall("SemLock", semid);
                 temp=exposcall("Write",fd, iter);
                 temp = exposcall("SemUnLock", semid);
