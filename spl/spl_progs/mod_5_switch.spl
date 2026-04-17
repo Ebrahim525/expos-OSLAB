@@ -13,19 +13,38 @@ process_table_entry = PROCESS_TABLE + currentPID * 16;
 
 // Looping through the Process Table
 alias newPID R1;
-newPID = 0;
-newPID = currentPID + 1;
-while( newPID < MAX_PROC_NUM ) do
-    if( [PROCESS_TABLE + newPID*16 + 4] == READY || [PROCESS_TABLE + newPID*16 + 4] == CREATED ) then
-        break;
+if([SYSTEM_STATUS_TABLE + 5] != 0) then
+    if([PROCESS_TABLE + 240 + 4] == WAIT_DISK) then
+        newPID = 0;
+    else
+        newPID = 15;
     endif;
 
-    newPID = newPID + 1;
-endwhile;
+else
+    newPID = currentPID + 1;
+    while(newPID < MAX_PROC_NUM - 1) do
+        if( [PROCESS_TABLE + newPID*16 + 4] == READY || [PROCESS_TABLE + newPID*16 + 4] == CREATED && [PROCESS_TABLE + newPID*16 + 6] == 0) then
+            break;
+        endif;
 
-// If no process is in ready after currentPID
-if( newPID == MAX_PROC_NUM ) then
-    newPID = 0;
+        newPID = newPID + 1;
+    endwhile;
+
+    // If no process is in ready after currentPID
+    if(newPID == MAX_PROC_NUM - 1) then
+        newPID = 0;
+        while(newPID <= currentPID) do
+            if( [PROCESS_TABLE + newPID*16 + 4] == READY || [PROCESS_TABLE + newPID*16 + 4] == CREATED && [PROCESS_TABLE + newPID*16 + 6] == 0) then
+                break;
+            endif;
+
+            newPID = newPID + 1;
+        endwhile;
+    endif;
+
+    if(newPID == currentPID + 1) then
+        newPID = 0;
+    endif;
 endif;
 
 // Setting the new Process

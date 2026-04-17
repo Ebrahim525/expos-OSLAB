@@ -7,6 +7,44 @@ SP = [PROCESS_TABLE + ([SYSTEM_STATUS_TABLE + 1] * 16) + 11] * 512 - 1;
 //Backing Registers
 backup;
 
+
+
+if([SYSTEM_STATUS_TABLE + 5] != 0) then
+    if([SYSTEM_STATUS_TABLE + 1] == SWAPPER_DAEMON) then
+        if([SYSTEM_STATUS_TABLE + 5] == 1) then
+            R1 = SWAP_OUT
+            call MOD_6;
+        else
+            R1 = SWAP_IN
+            call MOD_6;
+        endif;
+    else
+        if([SYSTEM_STATUS_TABLE + 1] == IDLE_PROCESS) then
+
+        endif;
+    endif;
+else
+    if([SYSTEM_STATUS_TABLE + 2] < MEM_LOW) then
+        [SYSTEM_STATUS_TABLE + 5] = SWAP_OUT;
+    else
+        if([SYSTEM_STATUS_TABLE + 4] > 0) then
+            if([SYSTEM_STATUS_TABLE + 2] > MEM_HIGH) then
+                alias loop R0;
+                loop = 0;
+                while(loop < MAX_PROC_NUM) do
+                    if([PROCESS_TABLE + loop * 16 + 6] == 1 && [PROCESS_TABLE + loop * 16 + 0] > MAX_TICK) then
+                        [SYSTEM_STATUS_TABLE + 5] = SWAP_IN;
+                        break;
+                    endif;
+
+                    loop = loop + 1;
+            endif;
+        endif
+    endif;
+endif
+    
+
+
 //currentPID
 alias currentPID R0;
 currentPID = [SYSTEM_STATUS_TABLE + 1];

@@ -1,0 +1,262 @@
+alias functionNum R1;
+
+if(functionNum == SWAP_OUT) then
+
+endif;
+
+if(functionNum == SWAP_IN) then
+    alias swapPID R5;
+    alias loop R6;
+    alias temp1 R7;
+    alias temp2 R8;
+    alias tick R9;
+    
+    swapPID = -1;
+    temp1 = -1;
+    temp2 = -1;
+    tick = 0;
+    loop = 0;
+
+    while(loop < MAX_PROC_NUM - 1) do
+        if([PROCESS_TABLE + loop * 16 + 6] == 0 && [PROCESS_TABLE + loop * 16 + 4] != TERMINATED) then
+            if([PROCESS_TABLE + loop * 16 + 4] == WAIT_PROCESS) then
+                swapPID = loop;
+                break;
+            endif;
+
+            if([PROCESS_TABLE + loop * 16 + 4] == WAIT_SEMAPHORE) then
+                temp1 = loop;
+            endif;
+
+            if([PROCESS_TABLE + loop * 16 + 0] > tick && [PROCESS_TABLE + loop * 16 + 4] != RUNNING && [PROCESS_TABLE + loop * 16 + 4] != ALLOCATED) then
+                temp2 = loop;
+                tick = [PROCESS_TABLE + loop * 16 + 0];
+            endif;
+        endif;
+
+        loop = loop + 1;
+    endwhile;
+    if(loop != MAX_PROC_NUM - 1) then
+        if(swapPID == -1) then
+            if(temp1 == -1) then
+                swapPID = temp2;
+            else
+                swapPID = temp1;
+            endif;
+        endif;
+    else
+        [SYSTEM_STATUS_TABLE + 5] = 0;
+
+        return;
+    endif;
+
+    [PROCESS_TABLE + swapPID * 16 + 0] = 0; // TICK
+
+    alias swapPTBR = [PROCESS_TABLE + swapPID * 16 + 14];
+
+    multipush(R1, R5);
+    
+    R1 = RELEASE_PAGE;
+    R2 = [swapPTBR + 8];
+    [swaPTBR + 9] = -1;
+    call MOD_2;
+    R2 = [swapPTBR + 10];
+    [swapPTBR + 11] = -1;
+    call MOD_2;
+    R2 = [swapPTBR + 12];
+    [swapPTBR + 13] = -1;
+
+    call MOD_2;
+    R2 = [swapPTBR + 14];
+    [swapPTBR + 15] = -1;
+    call MOD_2;
+
+    multipop(R1, R5);
+
+
+    loop = 4;
+    while(loop < 8 && [swapPTBR + 4] != -1 && [MEMORY_FREE_LIST + [swapPTBR + loop]] == 1) do
+        multipush(R1, R5, R6); 
+            
+            R1 = GET_SWAP_BLOCK;
+            R2 = ;
+            call MOD_2;
+
+        multipop(R1, R5, R6);
+        
+        multipush(R1, R5, R6);
+
+            [DISK_MAP_TABLE + swapPID * 10 + loop / 2] = R0;
+            R1 = DISK_STORE;
+            R2 = swapPID;
+            R3 = [swapPTBR + loop];
+            R4 = R0;
+            call MOD_4;
+        
+        multipop(R1, R5, R6);
+
+        multipush(R1, R5, R6);
+
+            R1 = RELEASE_PAGE;
+            R2 = [swapPTBR + loop];
+            call MOD_2;
+        
+        multipop(R1, R5, R6);
+
+        [swapPTBR + loop] = -1;
+
+        loop = loop + 2;
+    endwhile;
+
+    loop = 16;
+    while(loop < 20) do
+        multipush(R1, R5, R6); 
+            
+            R1 = GET_SWAP_BLOCK;
+            R2 = ;
+            call MOD_2;
+
+        multipop(R1, R5, R6);
+        
+        multipush(R1, R5, R6);
+
+            [DISK_MAP_TABLE + swapPID * 10 + loop / 2] = R0;
+            R1 = DISK_STORE;
+            R2 = swapPID;
+            R3 = [swapPTBR + loop];
+            R4 = R0;
+            call MOD_4;
+        
+        multipop(R1, R5, R6);
+
+        multipush(R1, R5, R6);
+
+            R1 = RELEASE_PAGE;
+            R2 = [swapPTBR + loop];
+            call MOD_2;
+        
+        multipop(R1, R5, R6);
+
+        [swapPTBR + loop] = -1;
+
+        loop = loop + 2;
+    endwhile;
+
+    [PROCESS_TABLE + swapPID * 16 + 6] = 1;
+    [SYSTEM_STATUS_TABLE + 4] = [SYSTEM_STATUS_TABLE + 4] + 1;
+    [SYSTEM_STATUS_TABLE + 5] = 0;
+
+    return;
+endif;
+
+if(funtionNum == SWAP_IN) then
+    alias swapPID R5;
+    alias loop R6;
+    alias tick R7;
+
+    swapPID = -1;
+    loop = 0;
+    tick = -1;
+    while(loop < MAX_PROC_NUM - 1) do
+        if([PROCESS_TABLE + loop * 16 + 6] == 1 && [PROCESS_TABLE + loop * 16 + 4] == READY) then
+            if([PROCESS_TABLE + loop * 16 + 0] > tick) then
+                swapPID = loop;
+                tick = [PROCESS_TABLE + loop * 16 + 0];
+            endif;
+        endif;
+
+        loop = loop + 1;
+    endwhile;
+    if(swapPID == -1) then
+        [SYSTEM_STATUS_TABLE + 5] = 0;
+
+        return;
+    endif;
+
+
+    [PROCESS_TABLE + swapPID * 16 + 0] = 0;
+
+    loop = 4;
+    while(loop < 8) do
+        multipush(R1, R5, R6); 
+            
+            R1 = GET_FREE_PAGE;
+            R2 = ;
+            call MOD_2;
+
+        multipop(R1, R5, R6);
+        
+        alias diskPage R7;
+        diskPage = [DISK_MAP_TABLE + swapPID * 10 + loop / 2];
+
+        alias memPage R8;
+        memPage = R0;
+        
+        multipush(R1, R5, R6, R7, R8);
+            R1 = DISK_LOAD;
+            R2 = swapPID;
+            R3 = memPage;
+            R4 = diskPage;
+            call MOD_4;
+        
+        multipop(R1, R5, R6, R7, R8);
+
+        multipush(R1, R5, R6, R7, R8);
+
+            R1 = RELEASE_BLOCK;
+            R2 = diskPage;
+            call MOD_2;
+        
+        multipop(R1, R5, R6, R7, R8);
+
+        [swapPTBR + loop] = memPage;
+        [swapPTBR + loop + 1] = "0110";
+
+        loop = loop + 2;
+    endwhile;
+
+    loop = 16;
+    while(loop < 20) do
+        multipush(R1, R5, R6); 
+            
+            R1 = GET_FREE_PAGE;
+            R2 = ;
+            call MOD_2;
+
+        multipop(R1, R5, R6);
+        
+        alias diskPage R7;
+        diskPage = [DISK_MAP_TABLE + swapPID * 10 + loop / 2];
+
+        alias memPage R8;
+        memPage = R0;
+        
+        multipush(R1, R5, R6, R7, R8);
+            R1 = DISK_LOAD;
+            R2 = swapPID;
+            R3 = memPage;
+            R4 = diskPage;
+            call MOD_4;
+        
+        multipop(R1, R5, R6, R7, R8);
+
+        multipush(R1, R5, R6, R7, R8);
+
+            R1 = RELEASE_BLOCK;
+            R2 = diskPage;
+            call MOD_2;
+        
+        multipop(R1, R5, R6, R7, R8);
+
+        [swapPTBR + loop] = memPage;
+        [swapPTBR + loop + 1] = "0110";
+
+        loop = loop + 2;
+    endwhile;
+
+    [PROCESS_TABLE + swapPID * 16 + 6] = 0;
+    [SYSTEM_STATUS_TABLE + 4] = [SYSTEM_STATUS_TABLE + 4] + 1;
+    [SYSTEM_STATUS_TABLE + 5] = 0;
+
+    return;
+endif;
