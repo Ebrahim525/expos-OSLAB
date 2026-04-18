@@ -12,16 +12,16 @@ backup;
 if([SYSTEM_STATUS_TABLE + 5] != 0) then
     if([SYSTEM_STATUS_TABLE + 1] == SWAPPER_DAEMON) then
         if([SYSTEM_STATUS_TABLE + 5] == 1) then
-            R1 = SWAP_OUT
+            R1 = SWAP_OUT;
             call MOD_6;
         else
-            R1 = SWAP_IN
+            R1 = SWAP_IN;
             call MOD_6;
         endif;
-    else
-        if([SYSTEM_STATUS_TABLE + 1] == IDLE_PROCESS) then
+    // else
+    //     if([SYSTEM_STATUS_TABLE + 1] == IDLE_PROCESS) then
 
-        endif;
+    //     endif;
     endif;
 else
     if([SYSTEM_STATUS_TABLE + 2] < MEM_LOW) then
@@ -38,14 +38,15 @@ else
                     endif;
 
                     loop = loop + 1;
+                endwhile;
             endif;
-        endif
+        endif;
     endif;
-endif
+endif;
     
 
 
-//currentPID
+// currentPID
 alias currentPID R0;
 currentPID = [SYSTEM_STATUS_TABLE + 1];
 

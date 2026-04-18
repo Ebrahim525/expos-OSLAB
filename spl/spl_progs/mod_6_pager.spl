@@ -1,10 +1,7 @@
 alias functionNum R1;
 
+
 if(functionNum == SWAP_OUT) then
-
-endif;
-
-if(functionNum == SWAP_IN) then
     alias swapPID R5;
     alias loop R6;
     alias temp1 R7;
@@ -14,7 +11,7 @@ if(functionNum == SWAP_IN) then
     swapPID = -1;
     temp1 = -1;
     temp2 = -1;
-    tick = 0;
+    tick = -1;
     loop = 0;
 
     while(loop < MAX_PROC_NUM - 1) do
@@ -52,13 +49,14 @@ if(functionNum == SWAP_IN) then
 
     [PROCESS_TABLE + swapPID * 16 + 0] = 0; // TICK
 
-    alias swapPTBR = [PROCESS_TABLE + swapPID * 16 + 14];
+    alias swapPTBR R7;
+    swapPTBR = [PROCESS_TABLE + swapPID * 16 + 14];
 
-    multipush(R1, R5);
+    multipush(R1, R5, R7);
     
     R1 = RELEASE_PAGE;
     R2 = [swapPTBR + 8];
-    [swaPTBR + 9] = -1;
+    [swapPTBR + 9] = -1;
     call MOD_2;
     R2 = [swapPTBR + 10];
     [swapPTBR + 11] = -1;
@@ -71,20 +69,19 @@ if(functionNum == SWAP_IN) then
     [swapPTBR + 15] = -1;
     call MOD_2;
 
-    multipop(R1, R5);
+    multipop(R1, R5, R7);
 
 
     loop = 4;
     while(loop < 8 && [swapPTBR + 4] != -1 && [MEMORY_FREE_LIST + [swapPTBR + loop]] == 1) do
-        multipush(R1, R5, R6); 
+        multipush(R1, R5, R6, R7); 
             
             R1 = GET_SWAP_BLOCK;
-            R2 = ;
             call MOD_2;
 
-        multipop(R1, R5, R6);
+        multipop(R1, R5, R6, R7);
         
-        multipush(R1, R5, R6);
+        multipush(R1, R5, R6, R7);
 
             [DISK_MAP_TABLE + swapPID * 10 + loop / 2] = R0;
             R1 = DISK_STORE;
@@ -93,15 +90,15 @@ if(functionNum == SWAP_IN) then
             R4 = R0;
             call MOD_4;
         
-        multipop(R1, R5, R6);
+        multipop(R1, R5, R6, R7);
 
-        multipush(R1, R5, R6);
+        multipush(R1, R5, R6, R7);
 
             R1 = RELEASE_PAGE;
             R2 = [swapPTBR + loop];
             call MOD_2;
         
-        multipop(R1, R5, R6);
+        multipop(R1, R5, R6, R7);
 
         [swapPTBR + loop] = -1;
 
@@ -110,15 +107,14 @@ if(functionNum == SWAP_IN) then
 
     loop = 16;
     while(loop < 20) do
-        multipush(R1, R5, R6); 
+        multipush(R1, R5, R6, R7); 
             
             R1 = GET_SWAP_BLOCK;
-            R2 = ;
             call MOD_2;
 
-        multipop(R1, R5, R6);
+        multipop(R1, R5, R6, R7);
         
-        multipush(R1, R5, R6);
+        multipush(R1, R5, R6, R7);
 
             [DISK_MAP_TABLE + swapPID * 10 + loop / 2] = R0;
             R1 = DISK_STORE;
@@ -127,15 +123,15 @@ if(functionNum == SWAP_IN) then
             R4 = R0;
             call MOD_4;
         
-        multipop(R1, R5, R6);
+        multipop(R1, R5, R6, R7);
 
-        multipush(R1, R5, R6);
+        multipush(R1, R5, R6, R7);
 
             R1 = RELEASE_PAGE;
             R2 = [swapPTBR + loop];
             call MOD_2;
         
-        multipop(R1, R5, R6);
+        multipop(R1, R5, R6, R7);
 
         [swapPTBR + loop] = -1;
 
@@ -149,7 +145,7 @@ if(functionNum == SWAP_IN) then
     return;
 endif;
 
-if(funtionNum == SWAP_IN) then
+if(functionNum == SWAP_IN) then
     alias swapPID R5;
     alias loop R6;
     alias tick R7;
@@ -176,15 +172,17 @@ if(funtionNum == SWAP_IN) then
 
     [PROCESS_TABLE + swapPID * 16 + 0] = 0;
 
+    alias swapPTBR R9;
+    swapPTBR = [PROCESS_TABLE + swapPID * 16 + 14];
+
     loop = 4;
     while(loop < 8) do
-        multipush(R1, R5, R6); 
+        multipush(R1, R5, R6, R9); 
             
             R1 = GET_FREE_PAGE;
-            R2 = ;
             call MOD_2;
 
-        multipop(R1, R5, R6);
+        multipop(R1, R5, R6, R9);
         
         alias diskPage R7;
         diskPage = [DISK_MAP_TABLE + swapPID * 10 + loop / 2];
@@ -192,22 +190,22 @@ if(funtionNum == SWAP_IN) then
         alias memPage R8;
         memPage = R0;
         
-        multipush(R1, R5, R6, R7, R8);
+        multipush(R1, R5, R6, R7, R8, R9);
             R1 = DISK_LOAD;
             R2 = swapPID;
             R3 = memPage;
             R4 = diskPage;
             call MOD_4;
         
-        multipop(R1, R5, R6, R7, R8);
+        multipop(R1, R5, R6, R7, R8, R9);
 
-        multipush(R1, R5, R6, R7, R8);
+        multipush(R1, R5, R6, R7, R8, R9);
 
             R1 = RELEASE_BLOCK;
             R2 = diskPage;
             call MOD_2;
         
-        multipop(R1, R5, R6, R7, R8);
+        multipop(R1, R5, R6, R7, R8, R9);
 
         [swapPTBR + loop] = memPage;
         [swapPTBR + loop + 1] = "0110";
@@ -217,13 +215,12 @@ if(funtionNum == SWAP_IN) then
 
     loop = 16;
     while(loop < 20) do
-        multipush(R1, R5, R6); 
+        multipush(R1, R5, R6, R9); 
             
             R1 = GET_FREE_PAGE;
-            R2 = ;
             call MOD_2;
 
-        multipop(R1, R5, R6);
+        multipop(R1, R5, R6, R9);
         
         alias diskPage R7;
         diskPage = [DISK_MAP_TABLE + swapPID * 10 + loop / 2];
@@ -231,22 +228,22 @@ if(funtionNum == SWAP_IN) then
         alias memPage R8;
         memPage = R0;
         
-        multipush(R1, R5, R6, R7, R8);
+        multipush(R1, R5, R6, R7, R8, R9);
             R1 = DISK_LOAD;
             R2 = swapPID;
             R3 = memPage;
             R4 = diskPage;
             call MOD_4;
         
-        multipop(R1, R5, R6, R7, R8);
+        multipop(R1, R5, R6, R7, R8, R9);
 
-        multipush(R1, R5, R6, R7, R8);
+        multipush(R1, R5, R6, R7, R8, R9);
 
             R1 = RELEASE_BLOCK;
             R2 = diskPage;
             call MOD_2;
         
-        multipop(R1, R5, R6, R7, R8);
+        multipop(R1, R5, R6, R7, R8, R9);
 
         [swapPTBR + loop] = memPage;
         [swapPTBR + loop + 1] = "0110";
