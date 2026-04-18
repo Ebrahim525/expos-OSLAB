@@ -272,6 +272,7 @@ while(memLoop < NUM_MEM_PAGES) do
 
     memLoop = memLoop + 1;
 endwhile;
+[MEMORY_FREE_LIST + 69] = 2;
 
 // Semaphore
 alias semaLoop R0;
