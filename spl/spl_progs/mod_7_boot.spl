@@ -1,102 +1,117 @@
-// Exception Handler
-loadi(2, 15);
-loadi(3, 16);
+// // Exception Handler
+// loadi(2, 15);
+// loadi(3, 16);
 
-// Timer Interrupt
-loadi(4, 17);
-loadi(5, 18);
+// // Timer Interrupt
+// loadi(4, 17);
+// loadi(5, 18);
 
-// Disk Interrupt
-loadi(6, 19);
-loadi(7, 20);
+// // Disk Interrupt
+// loadi(6, 19);
+// loadi(7, 20);
 
-// Console Interrupt
-loadi(8, 21);
-loadi(9, 22);
+// // Console Interrupt
+// loadi(8, 21);
+// loadi(9, 22);
 
-// INT 4 (Create, Delete)
-loadi(10, 23);
-loadi(11, 24);
+// // INT 4 (Create, Delete)
+// loadi(10, 23);
+// loadi(11, 24);
 
-// INT 5 (Open, Close)
-loadi(12, 25);
-loadi(13, 26);
+// // INT 5 (Open, Close)
+// loadi(12, 25);
+// loadi(13, 26);
 
-// INT 6 (Read)
-loadi(14, 27);
-loadi(15, 28);
+// // INT 6 (Read)
+// loadi(14, 27);
+// loadi(15, 28);
 
-// INT 7 (Write)
-loadi(16, 29);
-loadi(17, 30);
+// // INT 7 (Write)
+// loadi(16, 29);
+// loadi(17, 30);
 
-// INT 8 (Fork)
-loadi(18, 31);
-loadi(19, 32);
+// // INT 8 (Fork)
+// loadi(18, 31);
+// loadi(19, 32);
 
-// INT 9 (Exec)
-loadi(20, 33);
-loadi(21, 34);
+// // INT 9 (Exec)
+// loadi(20, 33);
+// loadi(21, 34);
 
-// INT 10 (Exit)
-loadi(22,35);
-loadi(23,36);
+// // INT 10 (Exit)
+// loadi(22,35);
+// loadi(23,36);
 
-// INT 11 (Wait, Signal, GetPID, GetPPID)
-loadi(24,37);
-loadi(25,38);
+// // INT 11 (Wait, Signal, GetPID, GetPPID)
+// loadi(24,37);
+// loadi(25,38);
 
-// INT 12 (Logout)
-loadi(26,39);
-loadi(27,40);
+// // INT 12 (Logout)
+// loadi(26,39);
+// loadi(27,40);
 
-// INT 13 (SemGet)
-loadi(28,41);
-loadi(29,42);
+// // INT 13 (SemGet)
+// loadi(28,41);
+// loadi(29,42);
 
-// INT 14 (SemLock)
-loadi(30,43);
-loadi(31,44);
+// // INT 14 (SemLock)
+// loadi(30,43);
+// loadi(31,44);
 
-// INT 15 (Shutdown)
-loadi(32,45);
-loadi(33,46);
+// // INT 15 (Shutdown)
+// loadi(32,45);
+// loadi(33,46);
 
-// INT 16 (User)
-loadi(34,47);
-loadi(35,48);
+// // INT 16 (User)
+// loadi(34,47);
+// loadi(35,48);
 
-// INT 17 (Login)
-loadi(36,49);
-loadi(37,50);
+// // INT 17 (Login)
+// loadi(36,49);
+// loadi(37,50);
 
-// Module 0 (Terminal Acquire and Release)
-loadi(40, 53);
-loadi(41, 54);
+alias loop2 R0;
+loop2 = 2;
+while(loop2 < 37) do
+    loadi(loop2, loop2 + 13);
 
-// Module 1 (Process)
-loadi(42, 55);
-loadi(43, 56);
+    loop2 = loop2 + 1;
+endwhile;
 
-// Module 2 (Memory)
-loadi(44, 57);
-loadi(45, 58);
+loop2 = 40;
+while(loop2 < 53) do
+    loadi(loop2, loop2 + 13);
 
-// Module 3 (File)
-loadi(46, 59);
-loadi(47, 60);
+    loop2 = loop2 + 1;
+endwhile;
 
-// Module 4 (Terminal Write)
-loadi(48, 61);
-loadi(49, 62);
+// // Module 0 (Terminal Acquire and Release)
+// loadi(40, 53);
+// loadi(41, 54);
 
-// Modue 5 (Scheduler)
-loadi(50,63);
-loadi(51,64);
+// // Module 1 (Process)
+// loadi(42, 55);
+// loadi(43, 56);
 
-// Module 6 (Swap)
-loadi(52,65);
-loadi(53,66);
+// // Module 2 (Memory)
+// loadi(44, 57);
+// loadi(45, 58);
+
+// // Module 3 (File)
+// loadi(46, 59);
+// loadi(47, 60);
+
+// // Module 4 (Terminal Write)
+// loadi(48, 61);
+// loadi(49, 62);
+
+// // Modue 5 (Scheduler)
+// loadi(50,63);
+// loadi(51,64);
+
+// // Module 6 (Swap)
+// loadi(52,65);
+// loadi(53,66);
 
 // Loading Shared Library
 loadi(63,13);

@@ -23,6 +23,7 @@ load --module 2 /home/expos/myexpos/spl/spl_progs/mod_2_memory.xsm
 load --module 3 /home/expos/myexpos/spl/spl_progs/mod_3_file.xsm
 load --module 4 /home/expos/myexpos/spl/spl_progs/mod_4_device.xsm
 load --module 5 /home/expos/myexpos/spl/spl_progs/mod_5_switch.xsm
+load --module 6 /home/expos/myexpos/spl/spl_progs/mod_6_pager.xsm
 load --module 7 /home/expos/myexpos/spl/spl_progs/mod_7_boot.xsm
 load --init /home/expos/myexpos/expl/expl_progs/init.xsm
 load --shell /home/expos/myexpos/expl/expl_progs/shell.xsm

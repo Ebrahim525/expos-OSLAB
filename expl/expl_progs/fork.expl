@@ -7,6 +7,7 @@ int main() {
         temp = exposcall("Fork");
         temp = exposcall("Fork");
         temp = exposcall("Fork");
+        temp = exposcall("Fork");
         
         temp = exposcall("Exec", "pid.xsm");
         
