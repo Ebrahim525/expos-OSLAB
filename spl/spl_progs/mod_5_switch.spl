@@ -11,7 +11,6 @@ process_table_entry = PROCESS_TABLE + currentPID * 16;
 [process_table_entry + 14] = PTBR;
 [process_table_entry + 15] = PTLR;
 
-// Looping through the Process Table
 alias newPID R1;
 if([SYSTEM_STATUS_TABLE + 5] != 0) then
     if([PROCESS_TABLE + 240 + 4] == WAIT_DISK) then
@@ -28,7 +27,7 @@ else
 
         newPID = newPID + 1;
     endwhile;
-
+    
     // If no process is in ready after currentPID
     if(newPID == MAX_PROC_NUM - 1) then
         newPID = 1;
@@ -39,10 +38,10 @@ else
 
             newPID = newPID + 1;
         endwhile;
-    endif;
 
-    if(newPID == currentPID + 1) then
-        newPID = 0;
+        if(newPID == currentPID + 1) then
+            newPID = 0;
+        endif;
     endif;
 endif;
 
@@ -55,7 +54,7 @@ PTLR = [new_process_table + 15];
 
 //Switching System Status table
 [SYSTEM_STATUS_TABLE + 1] = newPID;
-
+breakpoint;
 if([new_process_table + 4] == CREATED) then
     BP = [[new_process_table + 11] * 512];
     SP = [new_process_table + 13];
