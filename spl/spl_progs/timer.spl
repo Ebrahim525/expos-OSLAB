@@ -11,17 +11,13 @@ backup;
 
 if([SYSTEM_STATUS_TABLE + 5] != 0) then
     if([SYSTEM_STATUS_TABLE + 1] == SWAPPER_DAEMON) then
-        if([SYSTEM_STATUS_TABLE + 5] == 1) then
+        if([SYSTEM_STATUS_TABLE + 5] == SWAP_OUT) then
             R1 = SWAP_OUT;
             call MOD_6;
         else
             R1 = SWAP_IN;
             call MOD_6;
         endif;
-    // else
-    //     if([SYSTEM_STATUS_TABLE + 1] == IDLE_PROCESS) then
-
-    //     endif;
     endif;
 else
     if([SYSTEM_STATUS_TABLE + 2] < MEM_LOW) then
@@ -34,7 +30,7 @@ else
                 alias loop R0;
                 loop = 3;
                 while(loop < MAX_PROC_NUM - 1) do
-                    if([PROCESS_TABLE + loop * 16 + 6] == 1 && [PROCESS_TABLE + loop * 16 + 4] == READY && [PROCESS_TABLE + loop * 16 + 0] > MAX_TICK) then
+                    if([PROCESS_TABLE + loop * 16 + 6] == 1 && [PROCESS_TABLE + loop * 16 + 4] != TERMINATED && [PROCESS_TABLE + loop * 16 + 0] > MAX_TICK) then
                         [SYSTEM_STATUS_TABLE + 5] = SWAP_IN;
                         break;
                     endif;
