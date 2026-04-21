@@ -20,7 +20,6 @@ if(EC != 0 || userSP == PTLR * 512 - 1) then
     endif;
 
     if(EC == 2) then
-        breakpoint;
         print("Illegal Memory Access");
     endif;
 

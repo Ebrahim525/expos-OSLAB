@@ -41,13 +41,13 @@ if(systemCall == INT_OPEN) then
         ireturn;
     endif;
 
-    multipush(R1, R2, R3, R4, R5, R6);
+    multipush(R1, R2, R3, R4, R5, R6, R11);
 
     R1 = OPEN;
     R2 = file;
     call MOD_3;
 
-    multipop(R1, R2, R3, R4, R5, R6);
+    multipop(R1, R2, R3, R4, R5, R6, R11);
 
     if(R0 < 0) then
         [PROCESS_TABLE + currentPID * 16 + 9] = 0;
@@ -80,13 +80,13 @@ if(systemCall == INT_CLOSE) then
         ireturn;
     endif;
 
-    multipush(R1, R2, R3, R4, R5);
+    multipush(R1, R2, R3, R4, R5, R11);
 
     R1 = CLOSE;
     R2 = [perProcessTable + file * 2 + 1];
     call MOD_3;
 
-    multipop(R1, R2, R3, R4, R5);
+    multipop(R1, R2, R3, R4, R5, R11);
 
     [perProcessTable + file * 2 + 0] = -1;
 
@@ -110,14 +110,14 @@ if(systemCall == INT_SEEK) then
     alias inodeTableEntry R8;
 	inodeTableEntry = [openTableEntry + 0];
 
-    multipush(R1, R2, R3, R4, R5, R6, R7, R8);
+    multipush(R1, R2, R3, R4, R5, R6, R7, R8, R11);
 
     R1 = ACQUIRE_INODE;
     R2 = currentPID;
     R3 = [openTableEntry + 0];
     call MOD_0;
 
-    multipop(R1, R2, R3, R4, R5, R6, R7, R8);
+    multipop(R1, R2, R3, R4, R5, R6, R7, R8, R11);
     if(R0 != 0) then
         [retValAddr] = -1;
         SP = userSP;
@@ -136,14 +136,14 @@ if(systemCall == INT_SEEK) then
     endif;
 
     if(Lseek + offset < 0) then
-        multipush(R1, R2, R3, R4, R5, R6, R7, R8, R9, R10);
+        multipush(R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11);
 
 		R1 = RELEASE_INODE;
 		R2 = currentPID;
 		R3 = inodeTableEntry;
 		call MOD_0;
 
-		multipop(R1, R2, R3, R4, R5, R6, R7, R8, R9, R10);
+		multipop(R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11);
 
         [retValAddr] = -2;
         SP = userSP;
@@ -162,20 +162,20 @@ if(systemCall == INT_SEEK) then
         endif;
     endif;
 
-    multipush(R1, R2, R3, R4, R5, R6, R7, R8, R9, R10);
+    multipush(R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11);
 
 		R1 = RELEASE_INODE;
 		R2 = currentPID;
 		R3 = inodeTableEntry;
 		call MOD_0;
 
-	multipop(R1, R2, R3, R4, R5, R6, R7, R8, R9, R10);
+	multipop(R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11);
     
     [retValAddr] = 0;
 endif;
 
 
 [PROCESS_TABLE + currentPID * 16 + 9] = 0;
-SP = [PROCESS_TABLE + currentPID * 16 + 13];
+SP = userSP;
 
 ireturn;

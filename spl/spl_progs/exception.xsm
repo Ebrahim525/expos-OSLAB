@@ -48,7 +48,6 @@ _L4:
 MOV R16, 2
 EQ R16, EC
 JZ R16, _L5
-BRKP
 MOV R16, "Illegal Memory Access"
 PORT P1, R16
 OUT

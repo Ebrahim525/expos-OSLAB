@@ -54,7 +54,7 @@ PTLR = [new_process_table + 15];
 
 //Switching System Status table
 [SYSTEM_STATUS_TABLE + 1] = newPID;
-breakpoint;
+
 if([new_process_table + 4] == CREATED) then
     BP = [[new_process_table + 11] * 512];
     SP = [new_process_table + 13];
