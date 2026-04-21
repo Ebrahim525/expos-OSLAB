@@ -20,7 +20,7 @@ if([SYSTEM_STATUS_TABLE + 5] != 0) then
     endif;
 else
     newPID = currentPID + 1;
-    while(newPID < MAX_PROC_NUM - 1) do
+    while(newPID < MAX_PROC_NUM) do
         if(([PROCESS_TABLE + newPID*16 + 4] == READY || [PROCESS_TABLE + newPID*16 + 4] == CREATED) && [PROCESS_TABLE + newPID*16 + 6] == 0) then
             break;
         endif;
@@ -29,7 +29,7 @@ else
     endwhile;
     
     // If no process is in ready after currentPID
-    if(newPID == MAX_PROC_NUM - 1) then
+    if(newPID == MAX_PROC_NUM) then
         newPID = 1;
         while(newPID <= currentPID) do
             if(([PROCESS_TABLE + newPID*16 + 4] == READY || [PROCESS_TABLE + newPID*16 + 4] == CREATED) && [PROCESS_TABLE + newPID*16 + 6] == 0) then

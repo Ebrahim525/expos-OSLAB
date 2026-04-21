@@ -1,6 +1,5 @@
 alias functionNum R1;
 
-
 if(functionNum == SWAP_OUT) then
     alias swapPID R5;
     alias loop R6;
@@ -30,22 +29,21 @@ if(functionNum == SWAP_OUT) then
                 tick = [PROCESS_TABLE + loop * 16 + 0];
             endif;
         endif;
+
         loop = loop + 1;
     endwhile;
-
-    if(swapPID == -1) then
+    if(loop == MAX_PROC_NUM - 1) then
         if(temp1 != -1) then
             swapPID = temp1;
         else
             if(temp2 != -1) then
                 swapPID = temp2;
+            else
+                [SYSTEM_STATUS_TABLE + 5] = 0;
+
+                return;
             endif;
         endif;
-    endif;
-
-    if(swapPID == -1) then
-        [SYSTEM_STATUS_TABLE + 5] = 0;
-        return;
     endif;
 
     [PROCESS_TABLE + swapPID * 16 + 0] = 0; // TICK
@@ -58,53 +56,38 @@ if(functionNum == SWAP_OUT) then
     while(loop < 20) do
         page = [swapPTBR + loop];
         if(page != -1) then
-            // Code pages (8, 10, 12, 14)
-            if(loop >= 8 && loop <= 14) then
-                multipush(R1, R5, R6, R7, R8);
-                R1 = RELEASE_PAGE;
-                R2 = page;
-                call MOD_2;
-                multipop(R1, R5, R6, R7, R8);
-                
-                [swapPTBR + loop] = -1;
-                [swapPTBR + loop + 1] = "0000";
-            else
-                // Heap (4, 6) or Stack (16, 18)
-                // For Heap, only if not shared
-                alias is_shared R10;
-                is_shared = 0;
-                if(loop < 8 && [MEMORY_FREE_LIST + page] > 1) then
-                    is_shared = 1;
-                endif;
-                
-                if(is_shared == 0) then
-                    // Swap Out
-                    multipush(R1, R5, R6, R7, R8);
+            if((loop < 8 && [MEMORY_FREE_LIST + page] == 1) || (loop > 15)) then
+                multipush(R1, R5, R6, R7); 
+
                     R1 = GET_SWAP_BLOCK;
                     call MOD_2;
-                    multipop(R1, R5, R6, R7, R8);
-                    
+
+                multipop(R1, R5, R6, R7);
+                
+                multipush(R1, R5, R6, R7);
+
                     [DISK_MAP_TABLE + swapPID * 10 + loop / 2] = R0;
-                    
-                    multipush(R1, R5, R6, R7, R8);
                     R1 = DISK_STORE;
-                    R2 = swapPID;
-                    R3 = page;
+                    R2 = [SYSTEM_STATUS_TABLE + 1];
+                    R3 = [swapPTBR + loop];
                     R4 = R0;
                     call MOD_4;
-                    multipop(R1, R5, R6, R7, R8);
-                    
-                    multipush(R1, R5, R6, R7, R8);
-                    R1 = RELEASE_PAGE;
-                    R2 = page;
-                    call MOD_2;
-                    multipop(R1, R5, R6, R7, R8);
-                    
-                    [swapPTBR + loop] = -1;
-                    [swapPTBR + loop + 1] = "0000";
-                endif;
+                
+                multipop(R1, R5, R6, R7);
             endif;
+
+            multipush(R1, R5, R6, R7);
+
+                    R1 = RELEASE_PAGE;
+                    R2 = [swapPTBR + loop];
+                    call MOD_2;
+                
+            multipop(R1, R5, R6, R7);
+
+            [swapPTBR + loop] = -1;
+            [swapPTBR + loop + 1] = "0000";
         endif;
+
         loop = loop + 2;
     endwhile;
 
@@ -115,6 +98,7 @@ if(functionNum == SWAP_OUT) then
 
     return;
 endif;
+
 
 if(functionNum == SWAP_IN) then
     alias swapPID R5;
@@ -161,7 +145,7 @@ if(functionNum == SWAP_IN) then
                 
                 multipush(R1, R5, R6, R7, R8, R9);
                 R1 = DISK_LOAD;
-                R2 = swapPID;
+                R2 = [SYSTEM_STATUS_TABLE + 1];
                 R3 = memPage;
                 R4 = diskPage;
                 call MOD_4;
