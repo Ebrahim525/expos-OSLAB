@@ -9,7 +9,7 @@
 	union Constant number;
 	char *variable, *p, var[10];
 	struct Typetable *temp;
-	int iterator, lineno = 1;
+	int i, lineno = 1;
 %}
 
 %%
@@ -66,7 +66,7 @@
 "alloc" 	{return ALLOC;}
 "free" 		{return FREE;}
 [a-zA-Z][a-zA-Z0-9]*	{
-			variable = malloc(yyleng * sizeof(char));
+			variable = malloc(sizeof(yytext));
 			strcpy(variable, yytext);
 			temp = TLookup("integer");  // default type for any word (variable or string) is int
 			yylval.nptr = TreeCreate(temp, NODE_ID, variable, &yytext, NULL, NULL, NULL, NULL); 
@@ -74,14 +74,14 @@
 		}
 \"(\\.|[^\\\"])*\"	{
 						variable = yytext + 1;
-						iterator = 0;
+						i = 0;
 						while(*variable != '"')
 						{
-							var[iterator] = *variable;
+							var[i] = *variable;
 						 	variable++;
-						 	iterator++;
+						 	i++;
 						}
-						var[iterator] = '\0';
+						var[i] = '\0';
 						p = var;
 						temp = TLookup("string");
 						yylval.nptr = TreeCreate(temp, NODE_STRVAL, var, &p, NULL, NULL, NULL, NULL);

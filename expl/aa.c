@@ -6,7 +6,7 @@ struct ASTNode *TreeCreate(struct Typetable *type, int nodetype, char *name, uni
 	temp->nodetype = nodetype;
 	if (name != NULL)
 	{
-		temp->name = (char *)malloc(strlen(name) * sizeof(char));
+		temp->name = (char *)malloc(sizeof(name));
 		strcpy(temp->name, name);
 	}
 	else

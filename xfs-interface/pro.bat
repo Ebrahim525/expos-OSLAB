@@ -1,9 +1,0 @@
-load --exec /home/expos/myexpos/expl/expl_progs/ls.xsm
-load --exec /home/expos/myexpos/expl/expl_progs/cat.xsm
-load --exec /home/expos/myexpos/expl/expl_progs/cp.xsm
-load --exec /home/expos/myexpos/expl/expl_progs/rm.xsm
-load --exec /home/expos/myexpos/expl/expl_progs/lu.xsm
-load --exec /home/expos/myexpos/expl/expl_progs/ru.xsm
-load --exec /home/expos/myexpos/expl/expl_progs/odd.xsm
-load --exec /home/expos/myexpos/expl/expl_progs/linked.xsm
-load --data /home/expos/myexpos/expl/samples/sample.dat
