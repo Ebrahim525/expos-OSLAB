@@ -46,7 +46,7 @@ if(functionNum == BUFFERED_READ || functionNum == BUFFERED_WRITE) then
     endif;
 
     if(functionNum == BUFFERED_READ) then
-        [word] = [BUFFER + buffer * 512 + offset];
+        [([PTBR + 2 * (word / 512)] * 512) + (word % 512)] = [BUFFER + buffer * 512 + offset];
     else
         [BUFFER + buffer * 512 + offset] = word;
         [BUFFER_TABLE + buffer * 4 + 1] = 1;

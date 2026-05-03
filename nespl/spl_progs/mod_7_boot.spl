@@ -178,7 +178,7 @@ endwhile;
 //Memory Free List
 alias memLoop R0;
 memLoop = 0;
-while(memLoop < 83) do
+while(memLoop < 85) do
     [MEMORY_FREE_LIST + memLoop] = 1;
 
     memLoop = memLoop + 1;
@@ -189,7 +189,7 @@ while(memLoop < NUM_MEM_PAGES) do
 
     memLoop = memLoop + 1;
 endwhile;
-[MEMORY_FREE_LIST + 69] = 2;
+[MEMORY_FREE_LIST + 69] = 3;
 
 // Semaphore
 alias semaLoop R0;
@@ -202,10 +202,14 @@ endwhile;
 
 
 // System Status Table
+[SYSTEM_STATUS_TABLE + 0] = 0; // User
+[SYSTEM_STATUS_TABLE + 1] = 0; // CurrentPID1
 [SYSTEM_STATUS_TABLE + 2] = 45; // Mem Free Count
 [SYSTEM_STATUS_TABLE + 3] = 0; // Wait Mem Count
 [SYSTEM_STATUS_TABLE + 4] = 0; // Swap Count
 [SYSTEM_STATUS_TABLE + 5] = 0; // Paging Status
+[SYSTEM_STATUS_TABLE + 6] = 14; // CurrentPID2
+[SYSTEM_STATUS_TABLE + 7] = 0; // Logout Status
 
 
 // Terminal Status Table
@@ -243,5 +247,9 @@ while(loop < MAX_OPENFILE_NUM) do
 
     loop = loop + 1;
 endwhile;
+
+// ACCESS CONTROL TABLE
+[ACCESS_CONTROL_TABLE + 0] = 0;
+[ACCESS_CONTROL_TABLE + 1] = 0;
 
 return;

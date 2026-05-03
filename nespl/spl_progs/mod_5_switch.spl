@@ -1,6 +1,9 @@
 // currentPID
-alias currentPID R0;
-currentPID = [SYSTEM_STATUS_TABLE + 1];
+alias currentPID1 R12;
+alias currentPID2 R11;
+currentPID1 = [SYSTEM_STATUS_TABLE + 1];
+currentPID2 = [SYSTEM_STATUS_TABLE + 6];
+
 
 // Push BP
 multipush(BP);
@@ -11,36 +14,72 @@ process_table_entry = PROCESS_TABLE + currentPID * 16;
 [process_table_entry + 14] = PTBR;
 [process_table_entry + 15] = PTLR;
 
-alias newPID R1;
-if([SYSTEM_STATUS_TABLE + 5] != 0) then
-    if([PROCESS_TABLE + 240 + 4] == WAIT_DISK) then
-        newPID = 0;
-    else
-        newPID = 15;
-    endif;
-else
-    newPID = currentPID + 1;
-    while(newPID < MAX_PROC_NUM) do
-        if(([PROCESS_TABLE + newPID*16 + 4] == READY || [PROCESS_TABLE + newPID*16 + 4] == CREATED) && [PROCESS_TABLE + newPID*16 + 6] == 0) then
-            break;
-        endif;
 
-        newPID = newPID + 1;
-    endwhile;
-    
-    // If no process is in ready after currentPID
-    if(newPID == MAX_PROC_NUM) then
-        newPID = 1;
-        while(newPID <= currentPID) do
+R1 = ACQUIRE_SCHED_LOCK;
+call MOD_8;
+
+alias newPID R1;
+
+if(CORE == 0) then
+    if([SYSTEM_STATUS_TABLE + 5] != 0) then
+        if([PROCESS_TABLE + 240 + 4] == WAIT_DISK) then
+            newPID = 0;
+        else
+            newPID = 15;
+        endif;
+    else
+        newPID = currentPID + 1;
+        while(newPID < MAX_PROC_NUM) do
             if(([PROCESS_TABLE + newPID*16 + 4] == READY || [PROCESS_TABLE + newPID*16 + 4] == CREATED) && [PROCESS_TABLE + newPID*16 + 6] == 0) then
                 break;
             endif;
 
             newPID = newPID + 1;
         endwhile;
+        
+        // If no process is in ready after currentPID
+        if(newPID == MAX_PROC_NUM) then
+            newPID = 1;
+            while(newPID <= currentPID) do
+                if(([PROCESS_TABLE + newPID*16 + 4] == READY || [PROCESS_TABLE + newPID*16 + 4] == CREATED) && [PROCESS_TABLE + newPID*16 + 6] == 0) then
+                    break;
+                endif;
 
-        if(newPID == currentPID + 1) then
-            newPID = 0;
+                newPID = newPID + 1;
+            endwhile;
+
+            if(newPID == currentPID + 1) then
+                newPID = 0;
+            endif;
+        endif;
+    endif;
+else
+    if([SYSTEM_STATUS_TABLE + 5] == 1 || [SYSTEM_STATUS_TABLE + 7] == 1) then
+        newPID = 14;
+    else
+        newPID = currentPID + 1;
+        while(newPID < MAX_PROC_NUM) do
+            if(([PROCESS_TABLE + newPID*16 + 4] == READY || [PROCESS_TABLE + newPID*16 + 4] == CREATED) && [PROCESS_TABLE + newPID*16 + 6] == 0) then
+                break;
+            endif;
+
+            newPID = newPID + 1;
+        endwhile;
+        
+        // If no process is in ready after currentPID
+        if(newPID == MAX_PROC_NUM) then
+            newPID = 1;
+            while(newPID <= currentPID) do
+                if(([PROCESS_TABLE + newPID*16 + 4] == READY || [PROCESS_TABLE + newPID*16 + 4] == CREATED) && [PROCESS_TABLE + newPID*16 + 6] == 0) then
+                    break;
+                endif;
+
+                newPID = newPID + 1;
+            endwhile;
+
+            if(newPID == currentPID + 1) then
+                newPID = 0;
+            endif;
         endif;
     endif;
 endif;
@@ -54,16 +93,22 @@ PTLR = [new_process_table + 15];
 
 //Switching System Status table
 [SYSTEM_STATUS_TABLE + 1] = newPID;
+[new_process_table + 4] = RUNNING;
+
+
+// Release Schedule Lock
+R1 = RELEASE_LOCK;
+R2 = SCHED_LOCK;
+call MOD_8;
+
 
 if([new_process_table + 4] == CREATED) then
     BP = [[new_process_table + 11] * 512];
     SP = [new_process_table + 13];
-    [new_process_table + 4] = RUNNING;
     [new_process_table + 9] = 0; //MODE FLAG 
     ireturn;
 endif;
 
-[new_process_table + 4] = RUNNING;
 
 // Restoring BP
 multipop(BP);

@@ -4,12 +4,21 @@ PTLR = 10;
 loadi(54, 67);
 loadi(55, 68);
 
+// Secondary Bootstrap
+loadi(128, 512);
+
+// MOD 8 (Access)
+loadi(132, 516);
+loadi(133, 517);
+
 // Loading Idle Code
 loadi(69, 11);
 
 SP = 76 * 512 - 1;
 
 call BOOT_MODULE;
+
+START;
 
 
 // Idle Process
@@ -117,8 +126,6 @@ endwhile;
 
 
 PTBR = PAGE_TABLE_BASE;
-// Setting PID Number in System Status Table
-[SYSTEM_STATUS_TABLE + 1] = 0;
 
 // Setting SP to point to the user stack of Idle Process
 SP = 8 * 512;

@@ -1,0 +1,55 @@
+PTBR = PAGE_TABLE_BASE + 280;
+
+// Library
+[PTBR+0] = -1;
+[PTBR+1] = "0000";
+[PTBR+2] = -1;
+[PTBR+3] = "0000";
+
+// Heap
+[PTBR+4] = -1;
+[PTBR+5] = "0000";
+[PTBR+6] = -1;
+[PTBR+7] = "0000";
+
+// Code
+[PTBR+8] = 69;
+[PTBR+9] = "0100";
+[PTBR+10] = -1;
+[PTBR+11] = "0100";
+[PTBR+12] = -1;
+[PTBR+13] = "0000";
+[PTBR+14] = -1;
+[PTBR+15] = "0000";
+
+// Stack
+[PTBR+16] = 83;
+[PTBR+17] = "0110";
+[PTBR+18] = -1;
+[PTBR+19] = "0000";
+
+// Setting User Area Page Number in Process Table
+[PROCESS_TABLE + 0] = 0; // TICK
+[PROCESS_TABLE + 1] = 0; // PID
+[PROCESS_TABLE + 3] = 0; // USERID
+[PROCESS_TABLE + 4] = RUNNING; // STATE
+[PROCESS_TABLE + 11] = 84; // User Area Page
+[PROCESS_TABLE + 12] = 0; // KPTR
+[PROCESS_TABLE + 13] = 8*512; // UPTR
+[PROCESS_TABLE + 14] = PAGE_TABLE_BASE + 280; // PTBR
+[PROCESS_TABLE + 15] = 10; // PTLR
+
+//SETTING ENTRY POINT IN USER STACK
+[83 * 512] = [69 * 512 + 1];
+
+alias loop R0;
+loop = 0;
+while(loop < 10) do
+    [DISK_MAP_TABLE + 224 + loop] = -1;
+    
+    loop = loop + 1;
+endwhile;
+
+[DISK_MAP_TABLE + 224 + 4] = 11;
+
+ireturn;
