@@ -1,13 +1,19 @@
+R1 = ACQUIRE_KERN_LOCK;
+call MOD_8;
+
+alias currentPID R15;
+currentPID = [SYSTEM_STATUS_TABLE + CORE*5 + 1];
+
 alias userSP R0;
 userSP = SP;
 
-[PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 13] = SP;
-SP = [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 11] * 512 - 1;
+[PROCESS_TABLE + currentPID * 16 + 13] = SP;
+SP = [PROCESS_TABLE + currentPID * 16 + 11] * 512 - 1;
 
 alias systemCall R1;
 systemCall = [[PTBR + 2 * (userSP-5) / 512] * 512 + (userSP-5) % 512];
 
-[PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 9] = systemCall;
+[PROCESS_TABLE + currentPID * 16 + 9] = systemCall;
 
 alias retValAddr R2;
 retValAddr = [PTBR + 2 * (userSP-1) / 512] * 512 + (userSP-1) % 512;
@@ -17,20 +23,29 @@ if(systemCall == INT_WAIT) then
     alias PID R3;
     PID = [[PTBR + 2 * (userSP-4) / 512] * 512 + (userSP-4) % 512];
 
-    if(PID == [SYSTEM_STATUS_TABLE + 1] || [PROCESS_TABLE + PID * 16 + 4] == TERMINATED || PID < 0 || PID >= MAX_PROC_NUM) then
+    if(PID == currentPID || [PROCESS_TABLE + PID * 16 + 4] == TERMINATED || PID < 0 || PID >= MAX_PROC_NUM) then
         [retValAddr] = -1;
-        [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 9] = 0;
-        SP = [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 13];
+        [PROCESS_TABLE + currentPID * 16 + 9] = 0;
+        SP = [PROCESS_TABLE + currentPID * 16 + 13];
 
         ireturn;
     endif;
 
-    [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 4] = WAIT_PROCESS;
-    [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 5] = PID;
+    [PROCESS_TABLE + currentPID * 16 + 4] = WAIT_PROCESS;
+    [PROCESS_TABLE + currentPID * 16 + 5] = PID;
 
-    multipush(R0, R1, R2, R3);
+    multipush(R0, R1, R2, R3, R15);
+
+    R1 = RELEASE_LOCK;
+    R2 = KERN_LOCK;
+    call MOD_8;
+
     call MOD_5;
-    multipop(R0, R1, R2, R3);
+
+    R1 = ACQUIRE_KERN_LOCK;
+    call MOD_8;
+    
+    multipop(R0, R1, R2, R3, R15);
 
     [retValAddr] = 0;
 endif;
@@ -39,7 +54,7 @@ if(systemCall == INT_SIGNAL) then
     alias processLoop R3;
     processLoop = 0;
     while(processLoop < MAX_PROC_NUM) do
-        if([PROCESS_TABLE + processLoop * 16 + 4] == WAIT_PROCESS && [PROCESS_TABLE + processLoop * 16 + 5] == [SYSTEM_STATUS_TABLE + 1]) then
+        if([PROCESS_TABLE + processLoop * 16 + 4] == WAIT_PROCESS && [PROCESS_TABLE + processLoop * 16 + 5] == currentPID) then
             [PROCESS_TABLE + processLoop * 16 + 4] = READY;
         endif;
 
@@ -50,16 +65,19 @@ if(systemCall == INT_SIGNAL) then
 endif;
 
 if(systemCall == INT_GETPID) then
-    [retValAddr] = [SYSTEM_STATUS_TABLE + 1];
+    [retValAddr] = currentPID;
 endif;
 
 if(systemCall == INT_GETPPID) then
-    [retValAddr] = [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 2];
+    [retValAddr] = [PROCESS_TABLE + currentPID * 16 + 2];
 endif;
 
 
-[PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 9] = 0;
-SP = [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 13];
+[PROCESS_TABLE + currentPID * 16 + 9] = 0;
+SP = [PROCESS_TABLE + currentPID * 16 + 13];
 
+R1 = RELEASE_LOCK;
+R2 = KERN_LOCK;
+call MOD_8;
 
 ireturn;

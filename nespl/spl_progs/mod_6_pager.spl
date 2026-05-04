@@ -13,7 +13,7 @@ if(functionNum == SWAP_OUT) then
     tick = -1;
     loop = 3;
 
-    while(loop < MAX_PROC_NUM - 1) do
+    while(loop < MAX_PROC_NUM - 2) do
         if([PROCESS_TABLE + loop * 16 + 6] == 0 && [PROCESS_TABLE + loop * 16 + 4] != TERMINATED) then
             if([PROCESS_TABLE + loop * 16 + 4] == WAIT_PROCESS) then
                 swapPID = loop;
@@ -32,7 +32,7 @@ if(functionNum == SWAP_OUT) then
 
         loop = loop + 1;
     endwhile;
-    if(loop == MAX_PROC_NUM - 1) then
+    if(loop == MAX_PROC_NUM - 2) then
         if(temp1 != -1) then
             swapPID = temp1;
         else
@@ -68,7 +68,7 @@ if(functionNum == SWAP_OUT) then
 
                     [DISK_MAP_TABLE + swapPID * 10 + loop / 2] = R0;
                     R1 = DISK_STORE;
-                    R2 = [SYSTEM_STATUS_TABLE + 1];
+                    R2 = [SYSTEM_STATUS_TABLE + CORE * 5 + 1];
                     R3 = [swapPTBR + loop];
                     R4 = R0;
                     call MOD_4;
@@ -108,7 +108,7 @@ if(functionNum == SWAP_IN) then
     swapPID = -1;
     loop = 3;
     tick = -1;
-    while(loop < MAX_PROC_NUM - 1) do
+    while(loop < MAX_PROC_NUM - 2) do
         if([PROCESS_TABLE + loop * 16 + 6] == 1 && [PROCESS_TABLE + loop * 16 + 4] == READY) then
             if([PROCESS_TABLE + loop * 16 + 0] > tick) then
                 swapPID = loop;
@@ -145,7 +145,7 @@ if(functionNum == SWAP_IN) then
                 
                 multipush(R1, R5, R6, R7, R8, R9);
                 R1 = DISK_LOAD;
-                R2 = [SYSTEM_STATUS_TABLE + 1];
+                R2 = [SYSTEM_STATUS_TABLE + CORE * 5 + 1];
                 R3 = memPage;
                 R4 = diskPage;
                 call MOD_4;

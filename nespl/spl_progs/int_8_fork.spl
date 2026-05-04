@@ -1,5 +1,8 @@
+R1 = ACQUIRE_KERN_LOCK;
+call MOD_8;
+
 alias currentPID R10;
-currentPID = [SYSTEM_STATUS_TABLE + 1];
+currentPID = [SYSTEM_STATUS_TABLE + CORE * 5 + 1];
 [PROCESS_TABLE + currentPID * 16 + 9] = 8;
 
 alias retValAddr R2;
@@ -171,5 +174,9 @@ retValAddr = [newPTBR + 2 * (newSP - 1)/512] * 512 + (newSP - 1) % 512;
 
 SP = [PROCESS_TABLE + currentPID * 16 + 13];
 [PROCESS_TABLE + currentPID * 16 + 9] = 0;
+
+R1 = RELEASE_LOCK;
+R2 = KERN_LOCK;
+call MOD_8;
 
 ireturn;

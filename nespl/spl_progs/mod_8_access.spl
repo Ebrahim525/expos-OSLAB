@@ -2,11 +2,11 @@ alias functionNum R1;
 
 if(functionNum == ACQUIRE_KERN_LOCK) then
     if(CORE == 1 && ([SYSTEM_STATUS_TABLE + 5] == 1 || [SYSTEM_STATUS_TABLE + 7] == 1)) then
-        [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 4] = READY;
+        [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + CORE * 5 + 1] * 16 + 4] = READY;
 
         multipush(R1);
 
-        call MOD_%;
+        call MOD_5;
 
         multipop(R1);
     endif;

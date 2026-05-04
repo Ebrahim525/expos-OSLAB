@@ -1,19 +1,26 @@
+R1 = ACQUIRE_KERN_LOCK;
+call MOD_8;
+
+
 alias userSP R1;
 userSP = SP;
 
-[PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 13] = SP;
-SP = [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 11] * 512 - 1;
+alias currentPID R15;
+currentPID = [SYSTEM_STATUS_TABLE + CORE*5 + 1];
+
+[PROCESS_TABLE + currentPID * 16 + 13] = SP;
+SP = [PROCESS_TABLE + currentPID * 16 + 11] * 512 - 1;
 
 alias systemCall R2;
 systemCall = [[PTBR + 2 * (userSP-5) / 512] * 512 + (userSP-5) % 512];
 
-[PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 9] = systemCall;
+[PROCESS_TABLE + currentPID * 16 + 9] = systemCall;
 
 alias retValAddr R3;
 retValAddr = [PTBR + 2 * (userSP-1) / 512] * 512 + (userSP-1) % 512;
 
 alias perProcessTable R4;
-perProcessTable = (([PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 11] + 1) * 512) - 16;
+perProcessTable = (([PROCESS_TABLE + currentPID * 16 + 11] + 1) * 512) - 16;
 
 
 if(systemCall == INT_SEMLOCK) then
@@ -22,14 +29,14 @@ if(systemCall == INT_SEMLOCK) then
 
     if(semID < 0 || semID >= 8) then
         [retValAddr] = -1;
-        [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 9] = 0;
+        [PROCESS_TABLE + currentPID * 16 + 9] = 0;
         SP = userSP;
         ireturn;
     endif;
 
     if([perProcessTable + semID * 2 + 0] != SEMAPHORE) then
         [retValAddr] = -1;
-        [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 9] = 0;
+        [PROCESS_TABLE + currentPID * 16 + 9] = 0;
         SP = userSP;
 
         ireturn;
@@ -39,17 +46,20 @@ if(systemCall == INT_SEMLOCK) then
     semDesc = [perProcessTable + semID * 2 + 1];
 
     while([SEMAPHORE_TABLE + semDesc * 4 + 0] != -1) do
-        [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 4] = WAIT_SEMAPHORE;
-        [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 5] = semDesc;
+        [PROCESS_TABLE + currentPID * 16 + 4] = WAIT_SEMAPHORE;
+        [PROCESS_TABLE + currentPID * 16 + 5] = semDesc;
 
-        multipush(R1, R2, R3, R4, R5, R6);
-            
+        multipush(R1, R2, R3, R4, R5, R6, R15);
+        R1 = RELEASE_LOCK;
+        R2 = KERN_LOCK;
+        call MOD_8;
+
         call MOD_5;
         
-        multipop(R1, R2, R3, R4, R5, R6);
+        multipop(R1, R2, R3, R4, R5, R6, R15);
     endwhile;
 
-    [SEMAPHORE_TABLE + semDesc * 4 + 0] = [SYSTEM_STATUS_TABLE + 1];
+    [SEMAPHORE_TABLE + semDesc * 4 + 0] = currentPID;
 
     [retValAddr] = 0;
 
@@ -61,14 +71,14 @@ if(systemCall == INT_SEMUNLOCK) then
 
     if(semID < 0 || semID >= 8) then
         [retValAddr] = -1;
-        [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 9] = 0;
+        [PROCESS_TABLE + currentPID * 16 + 9] = 0;
         SP = userSP;
         ireturn;
     endif;
 
     if([perProcessTable + semID * 2 + 0] != SEMAPHORE) then
         [retValAddr] = -1;
-        [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 9] = 0;
+        [PROCESS_TABLE + currentPID * 16 + 9] = 0;
         SP = userSP;
 
         ireturn;
@@ -78,9 +88,9 @@ if(systemCall == INT_SEMUNLOCK) then
     semDesc = [perProcessTable + semID * 2 + 1];
 
     if([SEMAPHORE_TABLE + semDesc * 4 + 0] != -1) then
-        if([SEMAPHORE_TABLE + semDesc * 4 + 0] != [SYSTEM_STATUS_TABLE + 1]) then
+        if([SEMAPHORE_TABLE + semDesc * 4 + 0] != currentPID) then
             [retValAddr] = -2;
-            [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 9] = 0;
+            [PROCESS_TABLE + currentPID * 16 + 9] = 0;
             SP = userSP;
 
             ireturn;
@@ -103,8 +113,11 @@ if(systemCall == INT_SEMUNLOCK) then
 endif;
 
 
-[PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 9] = 0;
-SP = [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 13];
+[PROCESS_TABLE + currentPID * 16 + 9] = 0;
+SP = [PROCESS_TABLE + currentPID * 16 + 13];
 
+R1 = RELEASE_LOCK;
+R2 = KERN_LOCK;
+call MOD_8;
 
 ireturn;

@@ -41,6 +41,7 @@ PTBR = PAGE_TABLE_BASE + 280;
 
 //SETTING ENTRY POINT IN USER STACK
 [83 * 512] = [69 * 512 + 1];
+SP = 8 * 512;
 
 alias loop R0;
 loop = 0;

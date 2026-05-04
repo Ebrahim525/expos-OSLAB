@@ -18,7 +18,7 @@ SP = 76 * 512 - 1;
 
 call BOOT_MODULE;
 
-START;
+start;
 
 
 // Idle Process

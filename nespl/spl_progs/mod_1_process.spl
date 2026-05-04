@@ -93,7 +93,7 @@ if(functionNum == EXIT_PROCESS) then
 
     
     // Setting the child process
-    if([PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 9] != 9) then
+    if([PROCESS_TABLE + [SYSTEM_STATUS_TABLE + CORE * 5 + 1] * 16 + 9] != 9) then
         alias processLoop R3;
         processLoop = 0;
         while(processLoop < MAX_PROC_NUM) do
@@ -204,8 +204,8 @@ if(functionNum == KILL_ALL) then
     endwhile;
 
     loop = 2;
-    while(loop < MAX_PROC_NUM) do
-        if(currentPID != loop && [PROCESS_TABLE + loop * 16 + 4] != TERMINATED && loop != SWAPPER_DAEMON) then
+    while(loop < MAX_PROC_NUM - 2) do
+        if(currentPID != loop && [PROCESS_TABLE + loop * 16 + 4] != TERMINATED ) then
             multipush(R1, R2, R3);
 
             R1 = EXIT_PROCESS;

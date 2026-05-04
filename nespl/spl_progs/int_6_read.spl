@@ -1,12 +1,15 @@
+R1 = ACQUIRE_KERN_LOCK;
+call MOD_8;
+
 alias userSP R1;
 userSP = SP;
 alias currentPID R12;
-currentPID = [SYSTEM_STATUS_TABLE + 1];
+currentPID = [SYSTEM_STATUS_TABLE + CORE * 5 + 1];
 
 [PROCESS_TABLE + currentPID * 16 + 13] = userSP;
 SP = [PROCESS_TABLE + currentPID * 16 + 11] * 512 - 1;
 
-[PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 9] = 7;
+[PROCESS_TABLE + [SYSTEM_STATUS_TABLE + CORE * 5 + 1] * 16 + 9] = 7;
 
 alias retValAddr R2;
 retValAddr = [PTBR + 2 * ((userSP-1) / 512)] * 512 + (userSP-1) % 512;
@@ -18,13 +21,13 @@ alias word R4;
 word = [[PTBR + 2 * ((userSP - 3) / 512)] * 512 + ((userSP - 3) % 512)];
 
 alias perProcessTable R5;
-perProcessTable = (([PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 11] + 1) * 512) - 16;
+perProcessTable = (([PROCESS_TABLE + [SYSTEM_STATUS_TABLE + CORE * 5 + 1] * 16 + 11] + 1) * 512) - 16;
 
 if(fileDescriptor == -1) then
     multipush(R1, R2, R3, R4, R5);
 
 	R1 = TERMINAL_READ;
-	R2 = [SYSTEM_STATUS_TABLE + 1];
+	R2 = [SYSTEM_STATUS_TABLE + CORE * 5 + 1];
 	R3 = word;
     call MOD_4;
 
@@ -34,7 +37,7 @@ else
     if(fileDescriptor < 0 || fileDescriptor >= 8 || [perProcessTable + fileDescriptor * 2 + 0] != FILE) then
         [retValAddr] = -1;
         SP = userSP;
-        [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 9] = 0;
+        [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + CORE * 5 + 1] * 16 + 9] = 0;
 
         ireturn;
     endif;
@@ -45,7 +48,7 @@ else
     multipush(R1, R2, R3, R4, R5, R6);
 
     R1 = ACQUIRE_INODE;
-    R2 = [SYSTEM_STATUS_TABLE + 1];
+    R2 = [SYSTEM_STATUS_TABLE + CORE * 5 + 1];
     R3 = [openTableEntry + 0];
     call MOD_0;
 
@@ -53,7 +56,7 @@ else
     if(R0 != 0) then
         [retValAddr] = -1;
         SP = userSP;
-        [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 9] = 0;
+        [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + CORE * 5 + 1] * 16 + 9] = 0;
 
         ireturn;
     endif;
@@ -65,7 +68,7 @@ else
             multipush(R1, R2, R6);
 
             R1 = RELEASE_INODE;
-            R2 = [SYSTEM_STATUS_TABLE + 1];
+            R2 = [SYSTEM_STATUS_TABLE + CORE * 5 + 1];
             R3 = [openTableEntry + 0];
             call MOD_0;
 
@@ -73,7 +76,7 @@ else
 
             [retValAddr] = -2;
             SP = [PROCESS_TABLE + currentPID * 16 + 13];
-            [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 9] = 0;
+            [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + CORE * 5 + 1] * 16 + 9] = 0;
 
             ireturn;
         endif;
@@ -84,7 +87,7 @@ else
             multipush(R1, R2, R6);
 
             R1 = RELEASE_INODE;
-            R2 = [SYSTEM_STATUS_TABLE + 1];
+            R2 = [SYSTEM_STATUS_TABLE + CORE * 5 + 1];
             R3 = [openTableEntry + 0];
             call MOD_0;
 
@@ -92,7 +95,7 @@ else
 
             [retValAddr] = -2;
             SP = userSP;
-            [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 9] = 0;
+            [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + CORE * 5 + 1] * 16 + 9] = 0;
 
             ireturn;
         endif;
@@ -119,7 +122,7 @@ else
     multipush(R1, R2, R6);
 
     R1 = RELEASE_INODE;
-    R2 = [SYSTEM_STATUS_TABLE + 1];
+    R2 = [SYSTEM_STATUS_TABLE + CORE * 5 + 1];
     R3 = [openTableEntry + 0];
     call MOD_0;
 
@@ -129,6 +132,10 @@ endif;
 [retValAddr] = 0;
 
 SP = userSP;
-[PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 9] = 0;
+[PROCESS_TABLE + [SYSTEM_STATUS_TABLE + CORE * 5 + 1] * 16 + 9] = 0;
+
+R1 = RELEASE_LOCK;
+R2 = KERN_LOCK;
+call MOD_8;
 
 ireturn;

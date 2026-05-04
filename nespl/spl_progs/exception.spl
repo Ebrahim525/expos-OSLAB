@@ -1,11 +1,11 @@
 //MODE Flag
-[PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 9] = -1;
+[PROCESS_TABLE + [SYSTEM_STATUS_TABLE + CORE * 5 + 1] * 16 + 9] = -1;
 
 //Saving user Stack Pointer
-[PROCESS_TABLE + ([SYSTEM_STATUS_TABLE + 1] * 16) + 13] = SP;
+[PROCESS_TABLE + ([SYSTEM_STATUS_TABLE + CORE * 5 + 1] * 16) + 13] = SP;
 
 //Kernel Stack Pointer
-SP = [PROCESS_TABLE + ([SYSTEM_STATUS_TABLE + 1] * 16) + 11] * 512 - 1;
+SP = [PROCESS_TABLE + ([SYSTEM_STATUS_TABLE + CORE * 5 + 1] * 16) + 11] * 512 - 1;
 
 backup;
 
@@ -29,7 +29,7 @@ if(EC != 0 || userSP == PTLR * 512 - 1) then
 
     // Exit Process
     R1 = EXIT_PROCESS;
-    R2 = [SYSTEM_STATUS_TABLE + 1];
+    R2 = [SYSTEM_STATUS_TABLE + CORE * 5 + 1];
     call MOD_1;
 
     call MOD_5;
@@ -40,8 +40,8 @@ if(EPN > 3 && EPN < 8) then
     multipush(R0);
 
         R1 = GET_CODE_PAGE;
-        R2 = [SYSTEM_STATUS_TABLE + 1];
-        R3 = [DISK_MAP_TABLE + [SYSTEM_STATUS_TABLE + 1] * 10 + EPN];
+        R2 = [SYSTEM_STATUS_TABLE + CORE * 5 + 1];
+        R3 = [DISK_MAP_TABLE + [SYSTEM_STATUS_TABLE + CORE * 5 + 1] * 10 + EPN];
         call MOD_2;
 
         [PTBR + 2*EPN] = R0; // Memory Page
@@ -53,13 +53,13 @@ endif;
 if(EPN > 1 && EPN < 4) then
     multipush(R1, R2);
         R1 = GET_FREE_PAGE;
-        R2 = [SYSTEM_STATUS_TABLE + 1];
+        R2 = [SYSTEM_STATUS_TABLE + CORE * 5 + 1];
         call MOD_2;
         [PTBR + 4] = R0;
         [PTBR + 5] = "1110";
 
         R1 = GET_FREE_PAGE;
-        R2 = [SYSTEM_STATUS_TABLE + 1];
+        R2 = [SYSTEM_STATUS_TABLE + CORE * 5 + 1];
         call MOD_2;
         [PTBR + 6] = R0;
         [PTBR + 7] = "1110";
@@ -67,13 +67,13 @@ if(EPN > 1 && EPN < 4) then
 endif;
 
 //MODE Flag
-[PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 9] = 0;
+[PROCESS_TABLE + [SYSTEM_STATUS_TABLE + CORE * 5 + 1] * 16 + 9] = 0;
 
 multipop(EIP);
 
 restore;
 
-SP = [PROCESS_TABLE + ([SYSTEM_STATUS_TABLE + 1] * 16) + 13];
+SP = [PROCESS_TABLE + ([SYSTEM_STATUS_TABLE + CORE * 5 + 1] * 16) + 13];
 
 SP = SP + 1;
 [[PTBR + 2*(SP / 512)] * 512 + SP % 512] = EIP;

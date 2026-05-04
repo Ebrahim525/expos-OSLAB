@@ -1,13 +1,16 @@
+R1 = ACQUIRE_KERN_LOCK;
+call MOD_8;
+
 //MODE Flag
-[PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 9] = 9;
+[PROCESS_TABLE + [SYSTEM_STATUS_TABLE + CORE * 5 + 1] * 16 + 9] = 9;
 
 //Save User SP
 alias userSP R0;
 userSP = SP;
 
 //Saving SP in Process Table and setting SP to Kernel Stack
-[PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 13] = SP;
-SP = [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 11] * 512 - 1;
+[PROCESS_TABLE + [SYSTEM_STATUS_TABLE + CORE * 5 + 1] * 16 + 13] = SP;
+SP = [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + CORE * 5 + 1] * 16 + 11] * 512 - 1;
 
 alias retValAddr R1;
 retValAddr = [PTBR + 2 * (userSP - 1)/512] * 512 + ((userSP - 1) % 512);
@@ -21,8 +24,8 @@ while (inodeEntry < MAX_FILE_NUM) do
     if ([INODE_TABLE + inodeEntry * 16 + 1] == fileName) then
         if([INODE_TABLE + inodeEntry * 16 + 0] != EXEC) then
             [retValAddr] = -1;
-            [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 9] = 0;
-            SP = [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 13];
+            [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + CORE * 5 + 1] * 16 + 9] = 0;
+            SP = [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + CORE * 5 + 1] * 16 + 13];
             ireturn;
         endif;
         break;
@@ -33,21 +36,21 @@ endwhile;
 
 if (inodeEntry == MAX_FILE_NUM) then
     [retValAddr] = -1;
-    [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 9] = 0;
-    SP = [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 13];
+    [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + CORE * 5 + 1] * 16 + 9] = 0;
+    SP = [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + CORE * 5 + 1] * 16 + 13];
     ireturn;
 endif;
 
 multipush(R0, R1, R2, R3);
 
 R1 = EXIT_PROCESS;
-R2 = [SYSTEM_STATUS_TABLE + 1];
+R2 = [SYSTEM_STATUS_TABLE + CORE * 5 + 1];
 call MOD_1;
 
 multipop(R0, R1, R2, R3);
 
 alias userAreaPage R4;
-userAreaPage = [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 11];
+userAreaPage = [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + CORE * 5 + 1] * 16 + 11];
 
 //Mem Free List entry
 [MEMORY_FREE_LIST + userAreaPage] = [MEMORY_FREE_LIST + userAreaPage] + 1;
@@ -68,8 +71,8 @@ while(loop < 16) do
 endwhile;
 
 //State and Inode
-[PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 4] = RUNNING;
-[PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 7] = inodeEntry;
+[PROCESS_TABLE + [SYSTEM_STATUS_TABLE + CORE * 5 + 1] * 16 + 4] = RUNNING;
+[PROCESS_TABLE + [SYSTEM_STATUS_TABLE + CORE * 5 + 1] * 16 + 7] = inodeEntry;
 
 //Setting Library Pages
 [PTBR+0] = 63;
@@ -88,7 +91,7 @@ multipush(R0, R1, R2, R3, R4, R5);
 
 //Stack
 R1 = GET_FREE_PAGE;
-R2 = [SYSTEM_STATUS_TABLE + 1];
+R2 = [SYSTEM_STATUS_TABLE + CORE * 5 + 1];
 call MOD_2;
 [PTBR + 16] = R0;
 [PTBR + 17] = "0110";
@@ -98,7 +101,7 @@ call MOD_2;
 
 //Code
 R1 = GET_CODE_PAGE;
-R2 = [SYSTEM_STATUS_TABLE + 1];
+R2 = [SYSTEM_STATUS_TABLE + CORE * 5 + 1];
 R3 = [INODE_TABLE + inodeEntry * 16 + 8];
 call MOD_2;
 // Setting First Page
@@ -119,14 +122,14 @@ multipop(R0, R1, R2, R3, R4, R5);
 //Disk Map Table
 loop = 0;
 while(loop < 10) do
-    [DISK_MAP_TABLE + [SYSTEM_STATUS_TABLE + 1] * 10 + loop] = -1;
+    [DISK_MAP_TABLE + [SYSTEM_STATUS_TABLE + CORE * 5 + 1] * 10 + loop] = -1;
     
     loop = loop + 1;
 endwhile;
 
 loop = 0;
 while(loop < 4) do
-    [DISK_MAP_TABLE + [SYSTEM_STATUS_TABLE + 1] * 10 + 4 + loop] = [INODE_TABLE + inodeEntry * 16 + 8 + loop];
+    [DISK_MAP_TABLE + [SYSTEM_STATUS_TABLE + CORE * 5 + 1] * 10 + 4 + loop] = [INODE_TABLE + inodeEntry * 16 + 8 + loop];
 
     loop = loop + 1;
 endwhile;
@@ -137,6 +140,10 @@ endwhile;
 //Changing SP to user stack
 SP = 8 * 512;
 
-[PROCESS_TABLE + [SYSTEM_STATUS_TABLE + 1] * 16 + 9] = 0;
+[PROCESS_TABLE + [SYSTEM_STATUS_TABLE + CORE * 5 + 1] * 16 + 9] = 0;
+
+R1 = RELEASE_LOCK;
+R2 = KERN_LOCK;
+call MOD_8;
 
 ireturn;

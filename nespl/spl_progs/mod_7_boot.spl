@@ -249,7 +249,7 @@ while(loop < MAX_OPENFILE_NUM) do
 endwhile;
 
 // ACCESS CONTROL TABLE
-[ACCESS_CONTROL_TABLE + 0] = 0;
-[ACCESS_CONTROL_TABLE + 1] = 0;
+[ACCESS_LOCK_TABLE + 0] = 0;
+[ACCESS_LOCK_TABLE + 1] = 0;
 
 return;
