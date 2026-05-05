@@ -8,7 +8,7 @@ int main()
         fd = exposcall("Open", "root");
 
         if(fd < 0) then
-            write("Error opening root directory");
+            write("Error root");
         else
             seek = 0;
             while(1 == 1) do

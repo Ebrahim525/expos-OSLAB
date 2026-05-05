@@ -10,7 +10,7 @@ currentPID = [SYSTEM_STATUS_TABLE + CORE * 5 + 1];
 [PROCESS_TABLE + currentPID * 16 + 13] = userSP;
 SP = [PROCESS_TABLE + currentPID * 16 + 11] * 512 - 1;
 
-[PROCESS_TABLE + [SYSTEM_STATUS_TABLE + CORE * 5 + 1] * 16 + 9] = 27;
+[PROCESS_TABLE + currentPID * 16 + 9] = 27;
 
 alias retValAddr R3;
 retValAddr = [PTBR + 2 * ((userSP-1) / 512)] * 512 + (userSP-1) % 512;
@@ -25,14 +25,14 @@ alias password R6;
 password = [[PTBR + 2 * ((userSP - 3) / 512)] * 512 + ((userSP - 3) % 512)];
 
 
-[PROCESS_TABLE + [SYSTEM_STATUS_TABLE + CORE * 5 + 1] * 16 + 9] = systemCall;
+[PROCESS_TABLE + currentPID * 16 + 9] = systemCall;
 
 
 if(systemCall == INT_NEWUSR) then
     if([SYSTEM_STATUS_TABLE + 0] != ROOT || currentPID != SHELL_PROCESS) then
         [retValAddr] = -2;
         SP = userSP;
-        [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + CORE * 5 + 1] * 16 + 9] = 0;
+        [PROCESS_TABLE + currentPID * 16 + 9] = 0;
 
         ireturn;
     endif;
@@ -43,7 +43,7 @@ if(systemCall == INT_NEWUSR) then
         if([USER_TABLE + userEntry * 2 + 0] == userName) then
             [retValAddr] = -1;
             SP = userSP;
-            [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + CORE * 5 + 1] * 16 + 9] = 0;
+            [PROCESS_TABLE + currentPID * 16 + 9] = 0;
 
             ireturn;
         endif;
@@ -61,7 +61,7 @@ if(systemCall == INT_NEWUSR) then
     if(userEntry == MAX_USER_NUM) then
         [retValAddr] = -3;
         SP = userSP;
-        [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + CORE * 5 + 1] * 16 + 9] = 0;
+        [PROCESS_TABLE + currentPID * 16 + 9] = 0;
 
         ireturn;
     endif;
@@ -78,7 +78,7 @@ if(systemCall == INT_REMUSR) then
     if([SYSTEM_STATUS_TABLE + 0] != ROOT || currentPID != SHELL_PROCESS || userName == "root" || userName == "kernel") then
         [retValAddr] = -2;
         SP = userSP;
-        [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + CORE * 5 + 1] * 16 + 9] = 0;
+        [PROCESS_TABLE + currentPID * 16 + 9] = 0;
 
         ireturn;
     endif;
@@ -95,7 +95,7 @@ if(systemCall == INT_REMUSR) then
     if(userEntry == MAX_USER_NUM) then
         [retValAddr] = -1;
         SP = userSP;
-        [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + CORE * 5 + 1] * 16 + 9] = 0;
+        [PROCESS_TABLE + currentPID * 16 + 9] = 0;
 
         ireturn;
     endif;
@@ -106,7 +106,7 @@ if(systemCall == INT_REMUSR) then
         if([ROOT_FILE + loop * 8 + 3] == userEntry) then
             [retValAddr] = -3;
             SP = userSP;
-            [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + CORE * 5 + 1] * 16 + 9] = 0;
+            [PROCESS_TABLE + currentPID * 16 + 9] = 0;
 
             ireturn;
         endif;
@@ -124,7 +124,7 @@ if(systemCall == INT_SETPWD) then
     if(currentPID != SHELL_PROCESS) then
         [retValAddr] = -1;
         SP = userSP;
-        [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + CORE * 5 + 1] * 16 + 9] = 0;
+        [PROCESS_TABLE + currentPID * 16 + 9] = 0;
 
         ireturn;
     endif;
@@ -141,7 +141,7 @@ if(systemCall == INT_SETPWD) then
     if(userEntry == MAX_USER_NUM) then
         [retValAddr] = -2;
         SP = userSP;
-        [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + CORE * 5 + 1] * 16 + 9] = 0;
+        [PROCESS_TABLE + currentPID * 16 + 9] = 0;
 
         ireturn;
     endif;
@@ -149,7 +149,7 @@ if(systemCall == INT_SETPWD) then
     if([PROCESS_TABLE + currentPID * 16 + 3] != userEntry && [SYSTEM_STATUS_TABLE + 0] != ROOT) then
         [retValAddr] = -1;
         SP = userSP;
-        [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + CORE * 5 + 1] * 16 + 9] = 0;
+        [PROCESS_TABLE + currentPID * 16 + 9] = 0;
 
         ireturn;
     endif;
@@ -168,7 +168,7 @@ if(systemCall == INT_GETUID) then
         if([USER_TABLE + userEntry * 2 + 0] == userName) then
             [retValAddr] = userEntry;
             SP = userSP;
-            [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + CORE * 5 + 1] * 16 + 9] = 0;
+            [PROCESS_TABLE + currentPID * 16 + 9] = 0;
 
             ireturn;
         endif;
@@ -185,7 +185,7 @@ if(systemCall == INT_GETUNAME) then
     if(userID < 0 || userID >= MAX_USER_NUM) then
         [retValAddr] = -1;
         SP = userSP;
-        [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + CORE * 5 + 1] * 16 + 9] = 0;
+        [PROCESS_TABLE + currentPID * 16 + 9] = 0;
 
         ireturn;
     endif;
@@ -193,7 +193,7 @@ if(systemCall == INT_GETUNAME) then
     if([USER_TABLE + userID * 2 + 0] == -1) then
         [retValAddr] = -1;
         SP = userSP;
-        [PROCESS_TABLE + [SYSTEM_STATUS_TABLE + CORE * 5 + 1] * 16 + 9] = 0;
+        [PROCESS_TABLE + currentPID * 16 + 9] = 0;
 
         ireturn;
     endif;
@@ -202,7 +202,7 @@ if(systemCall == INT_GETUNAME) then
 endif;
 
 SP = userSP;
-[PROCESS_TABLE + [SYSTEM_STATUS_TABLE + CORE * 5 + 1] * 16 + 9] = 0;
+[PROCESS_TABLE + currentPID * 16 + 9] = 0;
 
 R1 = RELEASE_LOCK;
 R2 = KERN_LOCK;

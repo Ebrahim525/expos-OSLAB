@@ -11,7 +11,7 @@ int main()
         fd2 = exposcall("Open", "root");
 
         if(fd1 < 0 OR fd2 < 0) then
-            write("Error opening root directory");
+            write("Error root");
         else
             temp = exposcall("Seek", fd1, 3);
             temp = exposcall("Seek", fd2, 0);
